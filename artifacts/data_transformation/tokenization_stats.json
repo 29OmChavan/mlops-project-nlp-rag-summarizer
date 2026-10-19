@@ -1,0 +1,11 @@
+{
+    "tokenizer_class": "T5Tokenizer",
+    "model_ckpt": "google/flan-t5-small",
+    "vocab_size": 32100,
+    "max_input_tokens_observed": 142,
+    "avg_input_tokens": 111.9,
+    "max_target_tokens_observed": 57,
+    "avg_target_tokens": 48.8,
+    "configured_max_input_length": 256,
+    "configured_max_target_length": 96
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project 03 · LoRA Summarizer & Hybrid RAG LLMOps</title>
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --muted: #8b949e;
+            --purple: #d2a8ff;
+            --green: #3fb950;
+            --accent: #58a6ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 40px 20px; line-height: 1.6; }
+        .container { max-width: 980px; margin: 0 auto; }
+        .header { margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 18px; }
+        .tag { color: var(--purple); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; }
+        h1 { font-size: 28px; margin-top: 6px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 780px) { .grid { grid-template-columns: 1fr; } }
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px; }
+        .card h2 { font-size: 16px; margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+        textarea, input {
+            width: 100%; padding: 10px 12px; border-radius: 6px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text); font-size: 13px; margin-bottom: 12px;
+        }
+        button {
+            width: 100%; padding: 11px; background: var(--purple); color: #0d1117;
+            border: none; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer;
+        }
+        .out-box {
+            margin-top: 14px; padding: 14px; border-radius: 8px;
+            background: rgba(210, 168, 255, 0.08); border: 1px solid var(--purple); font-size: 13px; display: none;
+        }
+        .stat-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .stat-val { font-weight: 600; color: var(--green); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="tag">Project 03 · NLP & LLMOps · PEFT LoRA + Hybrid Qdrant RAG</div>
+        <h1>Domain Summarizer & Citation-Grounded Hybrid RAG System</h1>
+        <p style="color:var(--muted); font-size:14px;">Fine-Tuned Flan-T5 LoRA · Qdrant Dense + BM25 Reciprocal Rank Fusion · ROUGE/BLEU Gate · Hallucination Monitor</p>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>1. PEFT LoRA Technical Dialogue Summarizer</h2>
+            <textarea id="dlgInput" rows="5">SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500. ML Engineer: Joblib failed to unpickle RiskDomainFeatureGenerator from __main__. We moved it into the installable src package with pip install -e . and resolved the outage.</textarea>
+            <button onclick="runSummarize()">Summarize with LoRA Adapter</button>
+            <div id="sumOut" class="out-box"></div>
+        </div>
+
+        <div class="card">
+            <h2>2. Hybrid RAG QA (Qdrant + BM25 RRF + Citations)</h2>
+            <input type="text" id="ragInput" value="How does LoRA parameterize weight updates and why is matrix B initialized to zero?">
+            <button onclick="runRAG()">Retrieve & Synthesize with Citations</button>
+            <div id="ragOut" class="out-box"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>LLMOps Evaluation & Retrieval Benchmark Telemetry</h2>
+        {% if eval_data and rag_data %}
+        <div class="stat-row"><span>Base Model ROUGE-L → LoRA Fine-Tuned ROUGE-L</span><span class="stat-val">{{ eval_data.base_model_metrics.rougeL }} → {{ eval_data.lora_finetuned_metrics.rougeL }} (+{{ eval_data.rougeL_improvement_percentage_points }}% pts)</span></div>
+        <div class="stat-row"><span>LoRA Fine-Tuned ROUGE-1 / BLEU</span><span class="stat-val">{{ eval_data.lora_finetuned_metrics.rouge1 }} / {{ eval_data.lora_finetuned_metrics.bleu }}</span></div>
+        <div class="stat-row"><span>CI/CD Evaluation Gate Passed</span><span class="stat-val">{{ eval_data.ci_cd_evaluation_gate_passed }}</span></div>
+        <div class="stat-row"><span>Naive Dense RAG MRR → Advanced Hybrid RRF RAG MRR</span><span class="stat-val">{{ rag_data.naive_dense_rag.mrr }} → {{ rag_data.advanced_hybrid_rrf_rag.mrr }}</span></div>
+        <div class="stat-row"><span>Advanced Hybrid RAG Recall@3</span><span class="stat-val">{{ rag_data.advanced_hybrid_rrf_rag.recall_at_3 }}</span></div>
+        {% else %}
+        <p style="color:var(--muted); font-size:13px;">Run `python main.py` to generate evaluation and RAG benchmark reports.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+async function runSummarize() {
+    const dlg = document.getElementById('dlgInput').value;
+    const resp = await fetch('/summarize', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({dialogue: dlg, max_new_tokens: 80})
+    });
+    const data = await resp.json();
+    const box = document.getElementById('sumOut');
+    box.style.display = 'block';
+    box.innerHTML = `<strong>Summary:</strong> ${data.summary}<br><small style="color:#8b949e">Faithfulness: ${data.faithfulness_score} · Latency: ${data.latency_ms} ms</small>`;
+}
+async function runRAG() {
+    const q = document.getElementById('ragInput').value;
+    const resp = await fetch('/rag-qa', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({query: q, top_k: 3})
+    });
+    const data = await resp.json();
+    const box = document.getElementById('ragOut');
+    box.style.display = 'block';
+    box.innerHTML = `<strong>Grounded Answer:</strong> ${data.answer}<br><small style="color:#8b949e">Citations: ${data.citation_tags.join(', ')} · Faithfulness: ${data.faithfulness_score} · Latency: ${data.latency_ms} ms</small>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+logs/
+mlruns/
+mlartifacts/
+.pytest_cache/
+artifacts/model_trainer/base_model_cache/
+.env
+.vscode/
+.idea/

@@ -1,0 +1,21 @@
+Tokenization:
+  max_input_length: 256
+  max_target_length: 96
+
+LoRA:
+  r: 8
+  lora_alpha: 16
+  lora_dropout: 0.05
+  target_modules: ["q", "v"]
+
+TrainingArguments:
+  epochs: 4
+  batch_size: 4
+  learning_rate: 0.001
+  weight_decay: 0.01
+
+RAG:
+  chunk_size: 320
+  chunk_overlap: 40
+  rrf_k: 60
+  rerank_alpha: 0.65

@@ -1,0 +1,23 @@
+{
+    "base_model": "google/flan-t5-small",
+    "lora_r": 8,
+    "lora_alpha": 16,
+    "target_modules": [
+        "q",
+        "v"
+    ],
+    "total_parameters": 77305216,
+    "trainable_lora_parameters": 344064,
+    "trainable_percentage": 0.4451,
+    "epochs": 4,
+    "epoch_losses": [
+        2.7336,
+        2.5234,
+        2.1458,
+        1.9418
+    ],
+    "final_train_loss": 1.9418,
+    "training_duration_sec": 35.93,
+    "pushed_to_huggingface_hub": true,
+    "hf_repo_id": "29Oms/mlops-project-3-lora-summarizer"
+}

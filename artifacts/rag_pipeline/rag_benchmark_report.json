@@ -1,0 +1,17 @@
+{
+    "top_k": 3,
+    "num_benchmark_queries": 6,
+    "naive_dense_rag": {
+        "hit_rate_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "precision_at_3": 0.3333,
+        "mrr": 1.0
+    },
+    "advanced_hybrid_rrf_rag": {
+        "hit_rate_at_1": 1.0,
+        "recall_at_3": 1.0,
+        "precision_at_3": 0.3333,
+        "mrr": 1.0
+    },
+    "mrr_improvement": 0.0
+}

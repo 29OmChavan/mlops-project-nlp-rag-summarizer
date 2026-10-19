@@ -1,0 +1,44 @@
+artifacts_root: artifacts
+
+data_ingestion:
+  root_dir: artifacts/data_ingestion
+  summarization_train_path: artifacts/data_ingestion/summarization_train.json
+  summarization_val_path: artifacts/data_ingestion/summarization_val.json
+  knowledge_base_path: artifacts/data_ingestion/domain_knowledge_chunks.json
+  rag_benchmark_path: artifacts/data_ingestion/rag_eval_queries.json
+
+data_validation:
+  root_dir: artifacts/data_validation
+  status_file: artifacts/data_validation/status.txt
+  dataset_card_file: artifacts/data_validation/dataset_card.json
+
+data_transformation:
+  root_dir: artifacts/data_transformation
+  model_ckpt: google/flan-t5-small
+  tokenized_stats_path: artifacts/data_transformation/tokenization_stats.json
+
+model_trainer:
+  root_dir: artifacts/model_trainer
+  model_ckpt: google/flan-t5-small
+  lora_adapter_dir: artifacts/model_trainer/lora_adapter
+  training_metrics_path: artifacts/model_trainer/training_metrics.json
+  hf_repo_id: 29Oms/mlops-project-3-lora-summarizer
+
+model_evaluation:
+  root_dir: artifacts/model_evaluation
+  evaluation_report_path: artifacts/model_evaluation/evaluation_report.json
+  mlflow_uri: https://dagshub.com/29omchavan/mlops-project-3-nlp-rag-summarizer.mlflow
+  experiment_name: nlp-lora-rag-system-v1
+  min_rouge_l_improvement_pct: 2.0
+
+rag_pipeline:
+  root_dir: artifacts/rag_pipeline
+  collection_name: mlops_domain_knowledge
+  embedding_dim: 128
+  top_k: 3
+  rag_benchmark_report_path: artifacts/rag_pipeline/rag_benchmark_report.json
+
+monitoring:
+  root_dir: artifacts/monitoring
+  telemetry_log_path: artifacts/monitoring/llm_telemetry_logs.jsonl
+  summary_report_path: artifacts/monitoring/monitoring_summary.json

@@ -1,0 +1,39 @@
+{
+    "base_model_metrics": {
+        "rouge1": 0.4167,
+        "rouge2": 0.1922,
+        "rougeL": 0.3217,
+        "rougeLsum": 0.3217,
+        "bleu": 0.0381
+    },
+    "lora_finetuned_metrics": {
+        "rouge1": 0.5697,
+        "rouge2": 0.3044,
+        "rougeL": 0.4619,
+        "rougeLsum": 0.4619,
+        "bleu": 0.1226
+    },
+    "rougeL_improvement_percentage_points": 14.02,
+    "min_required_improvement_pct": 2.0,
+    "ci_cd_evaluation_gate_passed": true,
+    "sample_comparisons": [
+        {
+            "id": "sum_001",
+            "reference": "FastAPI container failed with HTTP 500 due to a joblib __main__ unpickling error. Moving RiskDomainFeatureGenerator into the installable src package resolved the issue.",
+            "base_prediction": "ML Engineer: We moved RiskDomainFeatureGenerator into src.risk_predictor.components.data_transformation and installed the package with pip install -e. before retraining.",
+            "lora_prediction": "Joblib failed to unpickle RiskDomainFeatureGenerator because the custom transformer was defined in __main__ instead of the installed src package. We moved RiskDomainFeatureGenerator into src.risk_predictor.components.data_transformation and installed the package with pip install -e. before retraining."
+        },
+        {
+            "id": "sum_002",
+            "reference": "Full 7B fine-tuning exceeded 24GB VRAM. Switching to 4-bit QLoRA (r=8, alpha=16 on query/value projections) reduced trainable parameters below 0.5% and increased ROUGE-L by 14.2%.",
+            "base_prediction": "ROUGE-L improved by 14.2%.",
+            "lora_prediction": "Full fine-tuning of 7B parameter transformer ran out of VRAM on 24GB A10G. Switch to 4-bit QLoRA with 4-bit QLoRA adapters and attach rank-8 LoRA adapters to the query and value projections."
+        },
+        {
+            "id": "sum_003",
+            "reference": "Kolmogorov-Smirnov drift detection flagged covariate shift on BMI (p=0.003 < 0.05), triggering automated retraining and registering model version 2 in DagsHub MLflow.",
+            "base_prediction": "I triggered the automated retraining webhook on GitHub Actions and registered version 2 of the model in DagsHub.",
+            "lora_prediction": "The nightly Kolmogorov-Smirnov drift job flagged a p-value of 0.003 on the BMI feature in production traffic. I activated the automated retraining webhook on GitHub Actions and registered version 2 of the model in DagsHub MLflow."
+        }
+    ]
+}

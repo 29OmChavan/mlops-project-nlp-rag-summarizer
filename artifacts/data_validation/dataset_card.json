@@ -1,0 +1,23 @@
+{
+    "dataset_name": "MLOps Technical Incident & Architecture Summarization + RAG Corpus",
+    "validation_passed": true,
+    "anomalies": [],
+    "summarization_stats": {
+        "train_count": 18,
+        "val_count": 8,
+        "avg_dialogue_words": 54.8,
+        "avg_summary_words": 24.4,
+        "compression_ratio": 0.445
+    },
+    "rag_knowledge_base_stats": {
+        "total_chunks": 6,
+        "categories": [
+            "data_drift",
+            "dvc_pipeline",
+            "llm_finetuning",
+            "llm_monitoring",
+            "rag_optimization",
+            "tokenization"
+        ]
+    }
+}

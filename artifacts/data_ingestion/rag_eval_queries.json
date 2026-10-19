@@ -1,0 +1,52 @@
+{
+    "queries": [
+        {
+            "query_id": "Q1",
+            "query": "How does LoRA parameterize weight updates and why is matrix B initialized to zero?",
+            "expected_doc_ids": [
+                "DOC-101"
+            ],
+            "category_filter": "llm_finetuning"
+        },
+        {
+            "query_id": "Q2",
+            "query": "How does Reciprocal Rank Fusion (RRF) combine Qdrant dense search and BM25 for error code ERR_CUDA_OOM_404?",
+            "expected_doc_ids": [
+                "DOC-102"
+            ],
+            "category_filter": null
+        },
+        {
+            "query_id": "Q3",
+            "query": "What p-value threshold in the Kolmogorov-Smirnov ks_2samp test triggers data drift retraining?",
+            "expected_doc_ids": [
+                "DOC-103"
+            ],
+            "category_filter": "data_drift"
+        },
+        {
+            "query_id": "Q4",
+            "query": "How does dvc repro use dvc.lock hashes to skip unchanged pipeline stages?",
+            "expected_doc_ids": [
+                "DOC-104"
+            ],
+            "category_filter": null
+        },
+        {
+            "query_id": "Q5",
+            "query": "How does the CI/CD ROUGE-L evaluation gate and LLM faithfulness hallucination monitor work?",
+            "expected_doc_ids": [
+                "DOC-105"
+            ],
+            "category_filter": null
+        },
+        {
+            "query_id": "Q6",
+            "query": "How does Byte-Pair Encoding (BPE) merge UTF-8 bytes to avoid out-of-vocabulary tokens?",
+            "expected_doc_ids": [
+                "DOC-106"
+            ],
+            "category_filter": "tokenization"
+        }
+    ]
+}

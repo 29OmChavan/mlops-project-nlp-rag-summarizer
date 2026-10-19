@@ -1,0 +1,112 @@
+{
+    "data": [
+        {
+            "id": "sum_001",
+            "domain": "mlops_deployment",
+            "dialogue": "SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during blue-green rollout. ML Engineer: I checked the CloudWatch traceback. Joblib failed to unpickle RiskDomainFeatureGenerator because the custom transformer was defined in __main__ instead of the installed src package. SRE Lead: How did we fix it? ML Engineer: We moved RiskDomainFeatureGenerator into src.risk_predictor.components.data_transformation and installed the package with pip install -e . before retraining.",
+            "summary": "FastAPI container failed with HTTP 500 due to a joblib __main__ unpickling error. Moving RiskDomainFeatureGenerator into the installable src package resolved the issue."
+        },
+        {
+            "id": "sum_002",
+            "domain": "llm_finetuning",
+            "dialogue": "Researcher: Full fine-tuning of our 7B parameter transformer ran out of GPU VRAM on a single 24GB A10G. Tech Lead: Switch to QLoRA with 4-bit NormalFloat quantization and attach rank-8 LoRA adapters to the query and value projections. Researcher: I ran the experiment with r=8 and lora_alpha=16. Trainable parameters dropped below 0.5% and ROUGE-L improved by 14.2%.",
+            "summary": "Full 7B fine-tuning exceeded 24GB VRAM. Switching to 4-bit QLoRA (r=8, alpha=16 on query/value projections) reduced trainable parameters below 0.5% and increased ROUGE-L by 14.2%."
+        },
+        {
+            "id": "sum_003",
+            "domain": "data_drift",
+            "dialogue": "Data Engineer: The nightly Kolmogorov-Smirnov drift job flagged a p-value of 0.003 on the BMI feature in production traffic. MLOps Engineer: Let's inspect drift_report.yaml. Since p < 0.05, covariate shift is confirmed. Data Engineer: I triggered the automated retraining webhook on GitHub Actions and registered version 2 of the model in DagsHub MLflow.",
+            "summary": "Kolmogorov-Smirnov drift detection flagged covariate shift on BMI (p=0.003 < 0.05), triggering automated retraining and registering model version 2 in DagsHub MLflow."
+        },
+        {
+            "id": "sum_004",
+            "domain": "rag_optimization",
+            "dialogue": "AI Engineer: Naive dense vector search in Qdrant missed exact error codes like ERR_CUDA_OOM_404 in user queries. Architect: Dense embeddings struggle with rare alphanumeric identifiers. Combine Qdrant cosine similarity with BM25 lexical search using Reciprocal Rank Fusion. AI Engineer: Added Hybrid RRF plus cross-feature re-ranking. Recall@3 jumped from 0.67 to 1.00.",
+            "summary": "Naive dense vector search missed exact alphanumeric error codes. Combining Qdrant dense search with BM25 via Reciprocal Rank Fusion (RRF) and re-ranking increased Recall@3 from 0.67 to 1.00."
+        },
+        {
+            "id": "sum_005",
+            "domain": "computer_vision",
+            "dialogue": "CV Engineer: Our ResNet-18 poultry disease classifier Docker image was 2.6GB because pip pulled CUDA wheels on Linux. DevOps Lead: Add --extra-index-url https://download.pytorch.org/whl/cpu to requirements.txt and apply dynamic INT8 quantization. CV Engineer: Done. Image size shrank by 82% and validation accuracy remained at 100% across all four pathology classes.",
+            "summary": "Using CPU PyTorch wheels and dynamic INT8 quantization reduced the ResNet-18 Docker image size by 82% while maintaining 100% validation accuracy across four pathology classes."
+        },
+        {
+            "id": "sum_006",
+            "domain": "dvc_pipeline",
+            "dialogue": "ML Engineer: Teammates are re-running data ingestion and base model preparation on every commit even when only evaluation code changed. Platform Lead: Define a four-stage DAG in dvc.yaml tracking deps, params, outs, and scores.json metrics. ML Engineer: Now dvc repro checks SHA256 hashes in dvc.lock and skips unchanged upstream stages automatically.",
+            "summary": "Defining a four-stage DAG in dvc.yaml with dvc.lock hash tracking allowed dvc repro to skip unchanged upstream stages and track scores.json metrics reproducibly."
+        },
+        {
+            "id": "sum_001",
+            "domain": "mlops_deployment",
+            "dialogue": "SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during blue-green rollout. ML Engineer: I checked the CloudWatch traceback. Joblib failed to unpickle RiskDomainFeatureGenerator because the custom transformer was defined in __main__ instead of the installed src package. SRE Lead: How did we fix it? ML Engineer: We moved RiskDomainFeatureGenerator into src.risk_predictor.components.data_transformation and installed the package with pip install -e . before retraining.",
+            "summary": "FastAPI container failed with HTTP 500 due to a joblib __main__ unpickling error. Moving RiskDomainFeatureGenerator into the installable src package resolved the issue."
+        },
+        {
+            "id": "sum_002",
+            "domain": "llm_finetuning",
+            "dialogue": "Researcher: Full fine-tuning of our 7B parameter transformer ran out of GPU VRAM on a single 24GB A10G. Tech Lead: Switch to QLoRA with 4-bit NormalFloat quantization and attach rank-8 LoRA adapters to the query and value projections. Researcher: I ran the experiment with r=8 and lora_alpha=16. Trainable parameters dropped below 0.5% and ROUGE-L improved by 14.2%.",
+            "summary": "Full 7B fine-tuning exceeded 24GB VRAM. Switching to 4-bit QLoRA (r=8, alpha=16 on query/value projections) reduced trainable parameters below 0.5% and increased ROUGE-L by 14.2%."
+        },
+        {
+            "id": "sum_003",
+            "domain": "data_drift",
+            "dialogue": "Data Engineer: The nightly Kolmogorov-Smirnov drift job flagged a p-value of 0.003 on the BMI feature in production traffic. MLOps Engineer: Let's inspect drift_report.yaml. Since p < 0.05, covariate shift is confirmed. Data Engineer: I triggered the automated retraining webhook on GitHub Actions and registered version 2 of the model in DagsHub MLflow.",
+            "summary": "Kolmogorov-Smirnov drift detection flagged covariate shift on BMI (p=0.003 < 0.05), triggering automated retraining and registering model version 2 in DagsHub MLflow."
+        },
+        {
+            "id": "sum_004",
+            "domain": "rag_optimization",
+            "dialogue": "AI Engineer: Naive dense vector search in Qdrant missed exact error codes like ERR_CUDA_OOM_404 in user queries. Architect: Dense embeddings struggle with rare alphanumeric identifiers. Combine Qdrant cosine similarity with BM25 lexical search using Reciprocal Rank Fusion. AI Engineer: Added Hybrid RRF plus cross-feature re-ranking. Recall@3 jumped from 0.67 to 1.00.",
+            "summary": "Naive dense vector search missed exact alphanumeric error codes. Combining Qdrant dense search with BM25 via Reciprocal Rank Fusion (RRF) and re-ranking increased Recall@3 from 0.67 to 1.00."
+        },
+        {
+            "id": "sum_005",
+            "domain": "computer_vision",
+            "dialogue": "CV Engineer: Our ResNet-18 poultry disease classifier Docker image was 2.6GB because pip pulled CUDA wheels on Linux. DevOps Lead: Add --extra-index-url https://download.pytorch.org/whl/cpu to requirements.txt and apply dynamic INT8 quantization. CV Engineer: Done. Image size shrank by 82% and validation accuracy remained at 100% across all four pathology classes.",
+            "summary": "Using CPU PyTorch wheels and dynamic INT8 quantization reduced the ResNet-18 Docker image size by 82% while maintaining 100% validation accuracy across four pathology classes."
+        },
+        {
+            "id": "sum_006",
+            "domain": "dvc_pipeline",
+            "dialogue": "ML Engineer: Teammates are re-running data ingestion and base model preparation on every commit even when only evaluation code changed. Platform Lead: Define a four-stage DAG in dvc.yaml tracking deps, params, outs, and scores.json metrics. ML Engineer: Now dvc repro checks SHA256 hashes in dvc.lock and skips unchanged upstream stages automatically.",
+            "summary": "Defining a four-stage DAG in dvc.yaml with dvc.lock hash tracking allowed dvc repro to skip unchanged upstream stages and track scores.json metrics reproducibly."
+        },
+        {
+            "id": "sum_001",
+            "domain": "mlops_deployment",
+            "dialogue": "SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during blue-green rollout. ML Engineer: I checked the CloudWatch traceback. Joblib failed to unpickle RiskDomainFeatureGenerator because the custom transformer was defined in __main__ instead of the installed src package. SRE Lead: How did we fix it? ML Engineer: We moved RiskDomainFeatureGenerator into src.risk_predictor.components.data_transformation and installed the package with pip install -e . before retraining.",
+            "summary": "FastAPI container failed with HTTP 500 due to a joblib __main__ unpickling error. Moving RiskDomainFeatureGenerator into the installable src package resolved the issue."
+        },
+        {
+            "id": "sum_002",
+            "domain": "llm_finetuning",
+            "dialogue": "Researcher: Full fine-tuning of our 7B parameter transformer ran out of GPU VRAM on a single 24GB A10G. Tech Lead: Switch to QLoRA with 4-bit NormalFloat quantization and attach rank-8 LoRA adapters to the query and value projections. Researcher: I ran the experiment with r=8 and lora_alpha=16. Trainable parameters dropped below 0.5% and ROUGE-L improved by 14.2%.",
+            "summary": "Full 7B fine-tuning exceeded 24GB VRAM. Switching to 4-bit QLoRA (r=8, alpha=16 on query/value projections) reduced trainable parameters below 0.5% and increased ROUGE-L by 14.2%."
+        },
+        {
+            "id": "sum_003",
+            "domain": "data_drift",
+            "dialogue": "Data Engineer: The nightly Kolmogorov-Smirnov drift job flagged a p-value of 0.003 on the BMI feature in production traffic. MLOps Engineer: Let's inspect drift_report.yaml. Since p < 0.05, covariate shift is confirmed. Data Engineer: I triggered the automated retraining webhook on GitHub Actions and registered version 2 of the model in DagsHub MLflow.",
+            "summary": "Kolmogorov-Smirnov drift detection flagged covariate shift on BMI (p=0.003 < 0.05), triggering automated retraining and registering model version 2 in DagsHub MLflow."
+        },
+        {
+            "id": "sum_004",
+            "domain": "rag_optimization",
+            "dialogue": "AI Engineer: Naive dense vector search in Qdrant missed exact error codes like ERR_CUDA_OOM_404 in user queries. Architect: Dense embeddings struggle with rare alphanumeric identifiers. Combine Qdrant cosine similarity with BM25 lexical search using Reciprocal Rank Fusion. AI Engineer: Added Hybrid RRF plus cross-feature re-ranking. Recall@3 jumped from 0.67 to 1.00.",
+            "summary": "Naive dense vector search missed exact alphanumeric error codes. Combining Qdrant dense search with BM25 via Reciprocal Rank Fusion (RRF) and re-ranking increased Recall@3 from 0.67 to 1.00."
+        },
+        {
+            "id": "sum_005",
+            "domain": "computer_vision",
+            "dialogue": "CV Engineer: Our ResNet-18 poultry disease classifier Docker image was 2.6GB because pip pulled CUDA wheels on Linux. DevOps Lead: Add --extra-index-url https://download.pytorch.org/whl/cpu to requirements.txt and apply dynamic INT8 quantization. CV Engineer: Done. Image size shrank by 82% and validation accuracy remained at 100% across all four pathology classes.",
+            "summary": "Using CPU PyTorch wheels and dynamic INT8 quantization reduced the ResNet-18 Docker image size by 82% while maintaining 100% validation accuracy across four pathology classes."
+        },
+        {
+            "id": "sum_006",
+            "domain": "dvc_pipeline",
+            "dialogue": "ML Engineer: Teammates are re-running data ingestion and base model preparation on every commit even when only evaluation code changed. Platform Lead: Define a four-stage DAG in dvc.yaml tracking deps, params, outs, and scores.json metrics. ML Engineer: Now dvc repro checks SHA256 hashes in dvc.lock and skips unchanged upstream stages automatically.",
+            "summary": "Defining a four-stage DAG in dvc.yaml with dvc.lock hash tracking allowed dvc repro to skip unchanged upstream stages and track scores.json metrics reproducibly."
+        }
+    ]
+}

@@ -1,0 +1,46 @@
+{
+    "chunks": [
+        {
+            "doc_id": "DOC-101",
+            "title": "Low-Rank Adaptation (LoRA & QLoRA) Mathematical Architecture",
+            "category": "llm_finetuning",
+            "source": "mlops_engineering_handbook_v4.md",
+            "chunk_text": "Low-Rank Adaptation (LoRA) freezes pretrained Transformer weights W_0 in R^(d x k) and injects trainable rank decomposition matrices A in R^(r x k) and B in R^(d x r) where rank r << min(d, k). The forward pass computes h = W_0 x + (alpha / r) * B A x. Matrix A is initialized with Gaussian/Kaiming noise and Matrix B is initialized to zero so delta_W = 0 at the start of training. QLoRA combines 4-bit NormalFloat (NF4) quantization, double quantization, and paged optimizers to fine-tune LLMs on a single GPU."
+        },
+        {
+            "doc_id": "DOC-102",
+            "title": "Hybrid RAG with Reciprocal Rank Fusion (RRF) & Re-Ranking",
+            "category": "rag_optimization",
+            "source": "vector_search_architecture.md",
+            "chunk_text": "Production Retrieval-Augmented Generation (RAG) combines dense semantic vector search in Qdrant with sparse lexical BM25 keyword retrieval. Reciprocal Rank Fusion (RRF) merges rankings using the formula RRF_score(d) = sum_{m in {dense, bm25}} 1 / (k + rank_m(d)) with constant k = 60. This ensures exact technical identifiers (such as ERR_CUDA_OOM_404 or schema field names) are retrieved alongside semantically related chunks before cross-feature re-ranking and inline [DOC-ID] citation generation."
+        },
+        {
+            "doc_id": "DOC-103",
+            "title": "Statistical Data Drift Detection with Kolmogorov-Smirnov (KS) Test",
+            "category": "data_drift",
+            "source": "data_validation_spec.md",
+            "chunk_text": "Two-sample Kolmogorov-Smirnov (ks_2samp) testing measures the maximum vertical distance D = sup_x |F_train(x) - F_prod(x)| between cumulative distribution functions of training and production features. When the p-value falls below significance threshold alpha = 0.05, covariate shift is flagged in drift_report.yaml and automated retraining is triggered."
+        },
+        {
+            "doc_id": "DOC-104",
+            "title": "DVC Pipeline DAGs & Reproducible Deep Learning Workflows",
+            "category": "dvc_pipeline",
+            "source": "dvc_mlops_guide.md",
+            "chunk_text": "Data Version Control (DVC) defines Directed Acyclic Graphs (DAGs) in dvc.yaml with explicit cmd, deps, params, outs, and metrics (scores.json). Running dvc repro compares current SHA256/MD5 file hashes against dvc.lock and executes only stages whose dependencies changed, pushing large binary artifacts to DagsHub remote storage via dvc push."
+        },
+        {
+            "doc_id": "DOC-105",
+            "title": "CI/CD Model Evaluation Gates & LLM Hallucination Monitoring",
+            "category": "llm_monitoring",
+            "source": "llmops_production_runbook.md",
+            "chunk_text": "In automated LLMOps CI/CD pipelines, a new fine-tuned model is only promoted to production if its validation ROUGE-L score beats the baseline model by at least the configured gate threshold (e.g., +2.0%). Post-deployment, the LLM Monitor logs prompt/response latency, token cost, and a faithfulness grounding score measuring n-gram overlap against retrieved RAG chunks."
+        },
+        {
+            "doc_id": "DOC-106",
+            "title": "Byte-Pair Encoding (BPE) Subword Tokenization Algorithm",
+            "category": "tokenization",
+            "source": "karpathy_tokenizer_notes.md",
+            "chunk_text": "Byte-Pair Encoding (BPE) starts with a base vocabulary of 256 raw UTF-8 bytes and iteratively counts adjacent token pairs across a training corpus, merging the most frequent pair (p_1, p_2) into a new token ID >= 256. BPE eliminates out-of-vocabulary (OOV) unknown tokens while compressing frequent words and morphemes into single subword IDs."
+        }
+    ]
+}
