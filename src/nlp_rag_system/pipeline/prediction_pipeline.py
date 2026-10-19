@@ -5,9 +5,6 @@ import sys
 import time
 from pathlib import Path
 from typing import Dict, Any, Optional
-import torch
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from peft import PeftModel
 
 from src.nlp_rag_system.logger import logger
 from src.nlp_rag_system.exception import CustomException
@@ -23,7 +20,7 @@ class PredictionPipeline:
         self.cm = ConfigurationManager()
         self.eval_cfg = self.cm.get_model_evaluation_config()
         self.rag_cfg = self.cm.get_rag_pipeline_config()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = None
 
         self.tokenizer = None
         self.model = None
@@ -33,6 +30,11 @@ class PredictionPipeline:
     def _ensure_model_loaded(self) -> None:
         if self.model is not None and self.tokenizer is not None:
             return
+        import torch
+        from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+        from peft import PeftModel
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.tokenizer = AutoTokenizer.from_pretrained(self.eval_cfg.model_ckpt)
         base_model = AutoModelForSeq2SeqLM.from_pretrained(self.eval_cfg.model_ckpt)
         if Path(self.eval_cfg.lora_adapter_dir).exists():
@@ -47,6 +49,8 @@ class PredictionPipeline:
 
     def summarize(self, dialogue: str, max_new_tokens: int = 80) -> Dict[str, Any]:
         try:
+            import torch
+
             t0 = time.perf_counter()
             self._ensure_model_loaded()
             prompt = "summarize technical incident: " + dialogue.strip()

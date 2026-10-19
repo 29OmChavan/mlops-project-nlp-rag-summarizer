@@ -18,7 +18,6 @@ import uvicorn
 
 from src.nlp_rag_system.utils.common import load_json
 from src.nlp_rag_system.pipeline.prediction_pipeline import PredictionPipeline
-from src.nlp_rag_system.pipeline.training_pipeline import TrainingPipeline
 
 app = FastAPI(
     title="Production MLOps Project 03: LoRA Summarization & Hybrid RAG LLMOps API",
@@ -142,6 +141,8 @@ async def rag_qa_endpoint(
 @app.post("/train", tags=["Pipeline"])
 async def trigger_training():
     try:
+        from src.nlp_rag_system.pipeline.training_pipeline import TrainingPipeline
+
         res = TrainingPipeline().run_pipeline()
         return {"status": "Pipeline Completed", "results": res}
     except Exception as e:

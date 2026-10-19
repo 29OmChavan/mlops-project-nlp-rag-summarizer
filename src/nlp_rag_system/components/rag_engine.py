@@ -336,7 +336,7 @@ class HybridRAGEngine:
 
                 n = max(len(queries), 1)
                 return {
-                    f"hit_rate_at_1": round(sum(hit1s) / n, 4),
+                    "hit_rate_at_1": round(sum(hit1s) / n, 4),
                     f"recall_at_{k}": round(sum(recalls) / n, 4),
                     f"precision_at_{k}": round(sum(precisions) / n, 4),
                     "mrr": round(sum(mrrs) / n, 4),

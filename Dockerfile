@@ -6,11 +6,9 @@ ENV TMPDIR=/var/tmp
 COPY requirements.txt setup.py README.md ./
 COPY src/ ./src/
 
-# Install lightweight CPU-only PyTorch using disk-backed /var/tmp to avoid tmpfs OOM
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir \
-    transformers peft qdrant-client rank-bm25 scikit-learn numpy pandas pyyaml \
+    qdrant-client rank-bm25 rouge-score nltk scikit-learn numpy pandas pyyaml \
     fastapi uvicorn pydantic jinja2 -e . && \
     rm -rf /var/tmp/*
 

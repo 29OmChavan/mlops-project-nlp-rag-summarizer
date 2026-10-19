@@ -128,7 +128,7 @@ class LoRALinearFromScratch(nn.Module):
         r: int = 8,
         lora_alpha: float = 16.0,
         lora_dropout: float = 0.0,
-         pretrained_weight: Optional[torch.Tensor] = None,
+        pretrained_weight: Optional[torch.Tensor] = None,
     ):
         super().__init__()
         self.in_features = in_features
