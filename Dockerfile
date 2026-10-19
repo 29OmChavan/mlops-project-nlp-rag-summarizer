@@ -1,18 +1,18 @@
 FROM python:3.10-slim
 
 WORKDIR /app
+ENV TMPDIR=/var/tmp
 
 COPY requirements.txt setup.py README.md ./
 COPY src/ ./src/
 
-# Step 1: Install lightweight CPU-only PyTorch (~170MB instead of 2.3GB CUDA wheels)
+# Install lightweight CPU-only PyTorch using disk-backed /var/tmp to avoid tmpfs OOM
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
-
-# Step 2: Install NLP, PEFT/LoRA, Qdrant, BM25, and FastAPI serving dependencies
-RUN pip install --no-cache-dir \
+    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install --no-cache-dir \
     transformers peft qdrant-client rank-bm25 scikit-learn numpy pandas pyyaml \
-    fastapi uvicorn pydantic jinja2 -e .
+    fastapi uvicorn pydantic jinja2 -e . && \
+    rm -rf /var/tmp/*
 
 COPY config/ ./config/
 COPY params.yaml main.py app.py streamlit_app.py ./
