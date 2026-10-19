@@ -5,10 +5,13 @@ WORKDIR /app
 COPY requirements.txt setup.py README.md ./
 COPY src/ ./src/
 
-# Install lean runtime dependencies for FastAPI + LoRA + Qdrant Hybrid RAG serving
+# Step 1: Install lightweight CPU-only PyTorch (~170MB instead of 2.3GB CUDA wheels)
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu \
-    torch transformers peft qdrant-client rank-bm25 scikit-learn numpy pandas pyyaml \
+    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
+# Step 2: Install NLP, PEFT/LoRA, Qdrant, BM25, and FastAPI serving dependencies
+RUN pip install --no-cache-dir \
+    transformers peft qdrant-client rank-bm25 scikit-learn numpy pandas pyyaml \
     fastapi uvicorn pydantic jinja2 -e .
 
 COPY config/ ./config/
