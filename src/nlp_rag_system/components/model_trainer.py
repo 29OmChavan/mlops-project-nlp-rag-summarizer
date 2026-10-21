@@ -71,7 +71,7 @@ class ModelTrainer:
                 running_loss = 0.0
                 steps = 0
                 for i in range(0, len(all_train_samples), self.config.batch_size):
-                    batch = all_train_samples[i : i + self.config.batch_size]
+                    batch = all_train_samples[i:i + self.config.batch_size]
                     inputs = [
                         "summarize technical incident: " + item["dialogue"]
                         for item in batch
