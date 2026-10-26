@@ -484,6 +484,8 @@ Q: {query}</textarea>
                             <button type="button" class="btn btn-blue" onclick="callApi('GET', '/health?format=json')">1. Send GET /health</button>
                             <button type="button" class="btn btn-blue" onclick="callApi('GET', '/metrics?format=json')">2. Send GET /metrics</button>
                             <button type="button" class="btn btn-teal" onclick="callRagApi()">3. Send Sample POST /rag-qa</button>
+                            <button type="button" class="btn btn-blue" onclick="callApi('POST', '/displacy-entities?text=Qdrant%20RRF%20with%20LoRA%20and%20ROUGE-L%20on%20P99%20latency')">4. Send POST /displacy-entities (spaCy v3 displaCy NER)</button>
+                            <button type="button" class="btn btn-blue" onclick="callApi('POST', '/annotate-squad?question=How%20does%20RRF%20work%3F&amp;answer_text=Fuses%20Qdrant%20and%20BM25%20rankings')">5. Send POST /annotate-squad (cdQA SQuAD v2.0 Export)</button>
                         </div>
                     </div>
                     <div class="step-pane" id="pn-docs-2">

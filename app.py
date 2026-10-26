@@ -356,6 +356,7 @@ async def intro_ui(request: Request):
 
 
 @app.get("/studio", response_class=HTMLResponse, tags=["UI"])
+@app.get("/summarizer-studio", response_class=HTMLResponse, tags=["UI"])
 async def studio_ui(request: Request):
     return templates.TemplateResponse(
         request=request, name="index.html", context=_build_ui_context("studio")

@@ -1,8 +1,8 @@
 {
-    "total_requests_logged": 22,
-    "avg_latency_ms": 3668.12,
-    "avg_faithfulness_score": 0.9254,
+    "total_requests_logged": 23,
+    "avg_latency_ms": 3868.41,
+    "avg_faithfulness_score": 0.9286,
     "hallucination_alert_count": 0,
-    "total_tokens_processed": 2225,
-    "total_estimated_cost_usd": 0.0011125
+    "total_tokens_processed": 2265,
+    "total_estimated_cost_usd": 0.0011325
 }
