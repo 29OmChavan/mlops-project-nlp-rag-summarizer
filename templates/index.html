@@ -5,110 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PEFT LoRA Summarizer &amp; Hybrid RAG Suite (Step-by-Step Ops Modal)</title>
     <style>
-        /* Clean Step-by-Step Modal Wizard Layout (Project 03 - Kibana Ops Teal/Slate Theme) */
+        /* Project 03: 2021 Haystack / cdQA / spaCy displaCy Editorial Paper & Ink Neural Search Theme */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #e4e9f0;
-            color: #1a1c21;
-            font-size: 14px;
-            line-height: 1.55;
+            font-family: Georgia, "Times New Roman", Times, serif;
+            background-color: #f7f3e8;
+            color: #111111;
+            font-size: 14.5px;
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
         code, pre, .mono {
-            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-family: "Courier New", Courier, Consolas, monospace;
             font-size: 12.5px;
         }
         .kbn-topbar {
-            background-color: #1d1e24;
-            color: #dfe5ef;
-            padding: 10px 20px;
-            border-bottom: 3px solid #00bfb3;
+            background-color: #f7f3e8;
+            color: #111111;
+            padding: 16px 28px;
+            border-bottom: 3px double #111111;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .kbn-brand { font-weight: 700; font-size: 15px; color: #ffffff; }
+        .kbn-brand {
+            font-weight: 900;
+            font-size: 20px;
+            color: #111111;
+            letter-spacing: -0.3px;
+        }
         .kbn-nav {
-            background-color: #ffffff;
-            border-bottom: 1px solid #d3dae6;
-            padding: 0 16px;
+            background-color: #efe9d9;
+            border-bottom: 2px solid #111111;
+            padding: 10px 20px;
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 2px;
+            gap: 8px;
         }
         .kbn-tab {
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            padding: 10px 13px;
+            background: #ffffff;
+            border: 2px solid #111111;
+            box-shadow: 2px 2px 0px #111111;
+            padding: 6px 12px;
             font-size: 12.5px;
-            font-weight: 600;
-            color: #343741;
+            font-weight: 700;
+            font-family: "Courier New", Courier, monospace;
+            color: #111111;
             cursor: pointer;
         }
-        .kbn-tab:hover { background-color: #f5f7fa; color: #006bb4; }
-        .kbn-tab.active { color: #006bb4; border-bottom-color: #006bb4; background-color: #f0f7fc; }
+        .kbn-tab:hover { background-color: #fef08a; }
+        .kbn-tab.active {
+            color: #111111;
+            background-color: #fde047;
+            box-shadow: 3px 3px 0px #111111;
+            transform: translate(-1px, -1px);
+        }
 
-        /* Centered Modal Container */
+        /* Editorial Index-Card Binder Stage */
         .modal-stage {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            padding: 28px 16px 48px;
+            padding: 30px 16px 52px;
         }
         .modal-card {
             width: 100%;
-            max-width: 720px;
-            background-color: #ffffff;
-            border: 1px solid #c9d3e0;
-            border-radius: 4px;
-            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+            max-width: 760px;
+            background-color: #fffdf9;
+            border: 2px solid #111111;
+            border-radius: 0px;
+            box-shadow: 7px 7px 0px #111111;
             overflow: hidden;
         }
         .modal-header {
-            background-color: #fafbfd;
-            border-bottom: 1px solid #d3dae6;
-            padding: 14px 20px;
+            background-color: #efe9d9;
+            border-bottom: 2px solid #111111;
+            padding: 14px 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .modal-title { font-size: 15.5px; font-weight: 700; color: #1a1c21; }
+        .modal-title { font-size: 17px; font-weight: 900; color: #111111; }
         .step-bar {
             display: flex;
-            background-color: #f5f7fa;
-            border-bottom: 1px solid #d3dae6;
+            background-color: #f7f3e8;
+            border-bottom: 2px solid #111111;
         }
         .step-btn {
             flex: 1;
             text-align: center;
             padding: 10px 6px;
             font-size: 12px;
-            font-weight: 600;
-            color: #555;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: 700;
+            color: #333333;
             background: none;
             border: none;
-            border-right: 1px solid #d3dae6;
-            border-bottom: 3px solid transparent;
+            border-right: 2px solid #111111;
             cursor: pointer;
         }
         .step-btn:last-child { border-right: none; }
         .step-btn.active {
-            background-color: #ffffff;
-            color: #006bb4;
-            border-bottom-color: #006bb4;
-            font-weight: 700;
+            background-color: #fde047;
+            color: #111111;
+            font-weight: 900;
         }
-        .modal-body { padding: 22px; }
+        .modal-body { padding: 24px; }
         .modal-footer {
-            background-color: #fafbfd;
-            border-top: 1px solid #d3dae6;
-            padding: 12px 20px;
+            background-color: #efe9d9;
+            border-top: 2px solid #111111;
+            padding: 12px 22px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -117,35 +127,45 @@
         .step-pane { display: none; }
         .step-pane.active { display: block; }
 
-        label { display: block; font-size: 12.5px; font-weight: 600; color: #343741; margin-bottom: 5px; }
+        label {
+            display: block;
+            font-size: 12.5px;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: 700;
+            color: #111111;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
         input[type="text"], input[type="number"], select, textarea {
             width: 100%;
-            padding: 8px 10px;
-            font-size: 13.5px;
-            border: 1px solid #c9d3e0;
-            border-radius: 3px;
-            background-color: #fbfcfe;
-            color: #1a1c21;
+            padding: 9px 11px;
+            font-size: 14px;
+            border: 2px solid #111111;
+            border-radius: 0px;
+            background-color: #ffffff;
+            color: #111111;
             margin-bottom: 12px;
             font-family: inherit;
         }
         .btn {
             padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 3px;
+            font-size: 12.5px;
+            font-family: "Courier New", Courier, monospace;
+            font-weight: 700;
+            border-radius: 0px;
             cursor: pointer;
-            border: 1px solid transparent;
+            border: 2px solid #111111;
+            box-shadow: 3px 3px 0px #111111;
         }
-        .btn-blue { background-color: #006bb4; color: #ffffff; }
-        .btn-teal { background-color: #0079a5; color: #ffffff; }
-        .btn-outline { background-color: #ffffff; color: #343741; border-color: #c9d3e0; }
-        .btn-outline.active-persona { background-color: #006bb4; color: #ffffff; border-color: #00558f; }
+        .btn-blue { background-color: #fde047; color: #111111; }
+        .btn-teal { background-color: #bbf7d0; color: #111111; }
+        .btn-outline { background-color: #ffffff; color: #111111; }
+        .btn-outline.active-persona { background-color: #111111; color: #fde047; }
 
-        table.eui-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
-        table.eui-table th, table.eui-table td { border: 1px solid #d3dae6; padding: 7px 10px; text-align: left; }
-        table.eui-table th { background-color: #f5f7fa; font-weight: 700; }
-        pre.log-box { background-color: #1d1e24; color: #dfe5ef; padding: 10px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; }
+        table.eui-table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 8px; }
+        table.eui-table th, table.eui-table td { border: 2px solid #111111; padding: 8px 10px; text-align: left; }
+        table.eui-table th { background-color: #efe9d9; font-family: "Courier New", Courier, monospace; font-weight: 700; }
+        pre.log-box { background-color: #111111; color: #fde047; padding: 12px; border: 2px solid #111111; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; }
     </style>
 </head>
 <body>
