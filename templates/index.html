@@ -199,14 +199,22 @@
                         </div>
                         <label>Incident Transcript:</label>
                         <textarea id="sum-dialogue" rows="4">SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during peak traffic. ML Engineer: Joblib failed to unpickle RiskDomainFeatureGenerator from __main__ inside uvicorn workers. DevOps: We moved the transformer into the installable src package with pip install -e ., rebuilt the Docker image, verified /health passes, and restored 99.98% SLA availability.</textarea>
-                        <input id="sum-tokens" type="hidden" value="80" />
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px; font-size:12px;">
+                            <div><label>Min Len (HF):</label><input type="number" id="hf-min-len" value="24" min="10" max="60" /></div>
+                            <div><label>Max Tokens:</label><input type="number" id="sum-tokens" value="80" min="30" max="200" /></div>
+                            <div><label>Beam Search (`num_beams`):</label><input type="number" id="hf-beams" value="4" min="1" max="8" /></div>
+                        </div>
                         <button type="button" class="btn btn-blue" id="btn-summarize" onclick="runSummarizer()">Summarize &amp; Move to Step 2 &rarr;</button>
                     </div>
 
                     <!-- Step 2 -->
                     <div class="step-pane" id="pn-studio-2">
                         <p style="margin-bottom:8px;"><strong id="sum-persona-badge">Executive Summary</strong> (<span id="sum-faithfulness" class="mono">Grounding: --</span>)</p>
-                        <div id="sum-styled-text" style="border:1px solid #d3dae6; background:#fafbfd; padding:12px; margin-bottom:12px;">--</div>
+                        <div id="sum-styled-text" style="border:1px solid #d3dae6; background:#fafbfd; padding:12px; margin-bottom:10px;">--</div>
+                        <div style="margin-bottom:10px;">
+                            <strong style="font-size:12px;">spaCy v3 `displaCy` Domain Entities:</strong>
+                            <div id="sum-displacy" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;"></div>
+                        </div>
                         <table class="eui-table">
                             <tr><th>Word Compression</th><td id="comp-ratio" class="mono">--</td><th>Words (Src-&gt;Sum)</th><td id="comp-words" class="mono">--</td></tr>
                             <tr><th>Reading Time Saved</th><td id="comp-time" class="mono">--</td><th>Grade Level</th><td id="comp-grade" class="mono">--</td></tr>
@@ -216,7 +224,7 @@
 
                     <!-- Step 3 -->
                     <div class="step-pane" id="pn-studio-3">
-                        <p style="margin-bottom:10px;"><strong>Step 3:</strong> Enter a technical runbook question to compare Naive Dense, Pure BM25, and Hybrid RRF search.</p>
+                        <p style="margin-bottom:10px;"><strong>Step 3 (Haystack v1.x Retriever-Reader):</strong> Enter a technical runbook question to compare Bi-Encoder Dense, BM25, and Cross-Encoder Hybrid RRF search.</p>
                         <label>Technical Question:</label>
                         <input id="rag-query" type="text" value="How does LoRA parameterize weight updates and why is matrix B initialized to zero?" />
                         <label>Optional Category Filter:</label>
@@ -233,11 +241,16 @@
                     <div class="step-pane" id="pn-studio-4">
                         <p style="margin-bottom:6px;"><strong>Cited Answer</strong> (<span id="rag-faithfulness" class="mono">Grounding: --</span>)</p>
                         <div id="rag-answer" style="border:1px solid #d3dae6; background:#fafbfd; padding:12px; margin-bottom:10px;">--</div>
-                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; font-size:12px;">
-                            <div style="border:1px solid #d3dae6; padding:8px;"><strong>1. Naive Dense</strong><div id="duel-naive" class="mono" style="margin-top:4px;"></div></div>
-                            <div style="border:1px solid #d3dae6; padding:8px;"><strong>2. Pure BM25</strong><div id="duel-bm25" class="mono" style="margin-top:4px;"></div></div>
-                            <div style="border:1px solid #0079a5; background:#f0f7fc; padding:8px;"><strong>3. Hybrid RRF</strong><div id="duel-hybrid" class="mono" style="margin-top:4px;"></div></div>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; font-size:12px; margin-bottom:10px;">
+                            <div style="border:1px solid #d3dae6; padding:8px;"><strong>1. SBERT Bi-Encoder</strong><div id="duel-naive" class="mono" style="margin-top:4px;"></div></div>
+                            <div style="border:1px solid #d3dae6; padding:8px;"><strong>2. Okapi BM25</strong><div id="duel-bm25" class="mono" style="margin-top:4px;"></div></div>
+                            <div style="border:1px solid #0079a5; background:#f0f7fc; padding:8px;"><strong>3. Hybrid + Cross-Encoder</strong><div id="duel-hybrid" class="mono" style="margin-top:4px;"></div></div>
                         </div>
+                        <div style="border:1px solid #d3dae6; background:#f5f7fa; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+                            <span><strong>[cdQA-annotator Loop]</strong> Export verified answer span to <code>artifacts/squad_annotations.json</code>:</span>
+                            <button type="button" class="btn btn-outline" onclick="exportSquadSpan()">+ Export SQuAD v2.0 JSON</button>
+                        </div>
+                        <div id="squad-export-msg" class="mono" style="margin-top:6px; color:#006d64; font-size:11.5px;"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -531,7 +544,19 @@ Q: {query}</textarea>
             document.getElementById('comp-words').textContent = `${cm.source_word_count ?? 0}->${cm.summary_word_count ?? 0}`;
             document.getElementById('comp-time').textContent = `${cm.reading_time_saved_sec ?? 0}s`;
             document.getElementById('comp-grade').textContent = `${cm.estimated_grade_level ?? 10}`;
+            const ents = data.displacy_entities || [];
+            document.getElementById('sum-displacy').innerHTML = ents.map(e =>
+                `<span class="mono" style="background:${e.bg}; color:${e.fg}; padding:2px 6px; border-radius:2px; font-size:11.5px; font-weight:700;">${e.text} <small>[${e.label}]</small></span>`
+            ).join('');
             setStep('studio', 2);
+        }
+
+        async function exportSquadSpan() {
+            const q = document.getElementById('rag-query').value;
+            const ans = document.getElementById('rag-answer').textContent;
+            const res = await fetch('/annotate-squad?question=' + encodeURIComponent(q) + '&answer_text=' + encodeURIComponent(ans.slice(0, 120)), { method: 'POST' });
+            const d = await res.json();
+            document.getElementById('squad-export-msg').textContent = `Exported ${d.qa_id} (SQuAD ${d.squad_version}, total=${d.total_annotations}) to artifacts/squad_annotations.json`;
         }
 
         async function runRagDuel() {

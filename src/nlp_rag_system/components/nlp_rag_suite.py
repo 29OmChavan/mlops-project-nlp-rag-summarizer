@@ -277,6 +277,11 @@ class NLPRagInteractiveSuite:
 
         compression = self.compute_compression_and_readability(dialogue, raw_summary)
         claim_attributions = self.compute_claim_attributions(raw_summary, [dialogue])
+        displacy_spans = self.extract_displacy_entity_spans(styled_summary + " " + dialogue)
+
+        # huggingface/transformers summarization sliding-window stride metadata
+        words = dialogue.split()
+        stride_chunks = max(1, (len(words) + 127) // 128)
 
         return {
             **base_res,
@@ -286,6 +291,15 @@ class NLPRagInteractiveSuite:
             "compression_metrics": compression,
             "structured_extraction": extraction,
             "claim_attributions": claim_attributions,
+            "displacy_entities": displacy_spans,
+            "hf_decoding_config": {
+                "min_length": 24,
+                "max_length": 128,
+                "num_beams": 4,
+                "window_size_tokens": 512,
+                "stride_overlap_tokens": 64,
+                "sliding_window_chunks": stride_chunks,
+            },
         }
 
     def retrieve_bm25_only(
@@ -628,3 +642,74 @@ class NLPRagInteractiveSuite:
                 "zero_init_identity_verified": bool(delta_at_step0 < 1e-6),
             },
         }
+
+    @staticmethod
+    def extract_displacy_entity_spans(text: str) -> List[Dict[str, str]]:
+        """
+        explosion/projects spaCy v3 displaCy-inspired entity recognizer that tags
+        services, error metrics, infra terms, and database tokens with color badges.
+        """
+        patterns = [
+            ("SERVICE", r"\b(?:redis-cluster|payments-api|auth-gateway|checkout-worker|kafka-consumer|qdrant|postgres)\b", "#dbeafe", "#1e40af"),
+            ("METRIC_SLA", r"\b(?:\d+(?:\.\d+)?\s*(?:ms|s|%|GB|MB|req/s)|p99|p95|5xx|OOMKilled)\b", "#fef3c7", "#92400e"),
+            ("INFRA_K8S", r"\b(?:Kubernetes|HPA|Pod|StatefulSet|ConfigMap|Helm|Prometheus|Grafana|PagerDuty)\b", "#dcfce7", "#166534"),
+            ("MLOPS_MODEL", r"\b(?:LoRA|PEFT|BM25|FAISS|SBERT|RoBERTa|Cross-Encoder|BART|T5)\b", "#f3e8ff", "#6b21a8"),
+        ]
+        found: List[Dict[str, str]] = []
+        seen = set()
+        for label, pat, bg, fg in patterns:
+            for m in re.finditer(pat, text, flags=re.IGNORECASE):
+                val = m.group(0)
+                key = (val.lower(), label)
+                if key not in seen:
+                    seen.add(key)
+                    found.append({"text": val, "label": label, "bg": bg, "fg": fg})
+        return found[:12]
+
+    @staticmethod
+    def export_squad_v2_annotation(
+        question: str,
+        context: str,
+        answer_text: str,
+        doc_id: str = "DOC-RUNBOOK-01",
+        is_correct: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        cdqa-suite/cdQA (cdQA-annotator) inspired human annotation loop that exports
+        verified or corrected extractive QA spans to SQuAD v2.0 JSON format.
+        """
+        import os
+
+        squad_path = Path("artifacts/squad_annotations.json")
+        os.makedirs(squad_path.parent, exist_ok=True)
+        payload: Dict[str, Any] = {"version": "v2.0", "data": []}
+        if squad_path.exists():
+            try:
+                with open(squad_path, "r", encoding="utf-8") as f:
+                    payload = json.load(f)
+            except Exception:
+                payload = {"version": "v2.0", "data": []}
+
+        ans_start = max(0, context.lower().find(answer_text[:25].lower())) if answer_text else 0
+        qa_id = f"cdqa-squad-{len(payload.get('data', [])) + 101}"
+        entry = {
+            "title": doc_id,
+            "paragraphs": [
+                {
+                    "context": context,
+                    "qas": [
+                        {
+                            "id": qa_id,
+                            "question": question,
+                            "answers": [{"text": answer_text, "answer_start": ans_start}],
+                            "is_impossible": not is_correct,
+                        }
+                    ],
+                }
+            ],
+        }
+        payload.setdefault("data", []).append(entry)
+        with open(squad_path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2)
+        return {"qa_id": qa_id, "squad_version": "v2.0", "total_annotations": len(payload["data"]), "entry": entry}
+

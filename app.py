@@ -303,6 +303,33 @@ async def presets_endpoint():
     return SAMPLE_PRESETS
 
 
+@app.post("/annotate-squad", tags=["cdQA SQuAD v2.0 Annotation Loop"])
+async def annotate_squad_endpoint(
+    question: str = "How do we mitigate OOMKilled pods during traffic spikes?",
+    context: str = "Increase memory limits in deployment.yaml and configure HorizontalPodAutoscaler.",
+    answer_text: str = "Increase memory limits in deployment.yaml",
+    doc_id: str = "DOC-RUNBOOK-01",
+    is_correct: bool = True,
+):
+    """cdqa-suite/cdQA inspired human annotation loop exporting extractive spans to SQuAD v2.0 JSON."""
+    return get_suite().export_squad_v2_annotation(
+        question=question,
+        context=context,
+        answer_text=answer_text,
+        doc_id=doc_id,
+        is_correct=is_correct,
+    )
+
+
+@app.post("/displacy-entities", tags=["spaCy v3 displaCy NER"])
+async def displacy_entities_endpoint(
+    text: str = "payments-api p99 latency hit 840 ms on Kubernetes StatefulSet; applied LoRA & BM25 ranker.",
+):
+    """explosion/projects spaCy v3 displaCy-inspired domain entity recognizer."""
+    return {"entities": get_suite().extract_displacy_entity_spans(text)}
+
+
+
 @app.post("/train", tags=["Pipeline"])
 async def trigger_training():
     try:
