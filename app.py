@@ -36,13 +36,13 @@ from src.nlp_rag_system.components.nlp_rag_suite import (
 )
 
 app = FastAPI(
-    title="Production MLOps Project 03: LoRA Summarization & Hybrid RAG LLMOps API (v2.0.0)",
+    title="PEFT LoRA Summarizer & Hybrid RAG Suite",
     description=(
-        "6-Page Interactive PEFT LoRA Fine-Tuned Transformer (google/flan-t5-small), "
-        "Qdrant + BM25 Hybrid RAG with Reciprocal Rank Fusion & Citations, "
-        "First-Principles BPE/Attention/LoRA Lab, ROUGE/BLEU Gate, and LLM Hallucination Monitor."
+        "Incident log summarization with Flan-T5 LoRA adapters, Qdrant + BM25 RRF search, "
+        "BPE/LoRA math checks, and grounding overlap logs."
     ),
     version="2.0.0",
+    docs_url="/swagger-raw",
 )
 
 templates = Jinja2Templates(directory="templates")
@@ -353,6 +353,20 @@ async def prompt_playground_ui(request: Request):
 async def evaluation_hub_ui(request: Request):
     return templates.TemplateResponse(
         request=request, name="index.html", context=_build_ui_context("evaluation")
+    )
+
+
+@app.get("/help", response_class=HTMLResponse, tags=["UI"])
+async def help_ui(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="index.html", context=_build_ui_context("help")
+    )
+
+
+@app.get("/docs", response_class=HTMLResponse, tags=["UI"])
+async def docs_ui(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="index.html", context=_build_ui_context("docs")
     )
 
 

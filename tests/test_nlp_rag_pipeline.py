@@ -80,11 +80,11 @@ def test_fastapi_v2_endpoints_and_pages():
     assert m.status_code == 200
     assert m.json()["lora_evaluation"]["ci_cd_evaluation_gate_passed"] is True
 
-    # Browser HTML content negotiation on /health, /metrics, /intro, /studio, /chunk-visualizer, /prompt-playground
-    for route in ["/intro", "/studio", "/chunk-visualizer", "/prompt-playground", "/evaluation-hub", "/health", "/metrics"]:
+    # Browser HTML content negotiation on /health, /metrics, /intro, /studio, /chunk-visualizer, /prompt-playground, /help, /docs
+    for route in ["/intro", "/studio", "/chunk-visualizer", "/prompt-playground", "/evaluation-hub", "/health", "/metrics", "/help", "/docs"]:
         html_res = client.get(route, headers={"Accept": "text/html"})
         assert html_res.status_code == 200
-        assert "PEFT LoRA Summarizer & Hybrid RAG Suite" in html_res.text
+        assert "PEFT LoRA Summarizer &amp; Hybrid RAG Suite" in html_res.text or "PEFT LoRA Summarizer & Hybrid RAG Suite" in html_res.text
 
     # Hybrid RAG QA + 3-mode comparison
     rag_resp = client.post(

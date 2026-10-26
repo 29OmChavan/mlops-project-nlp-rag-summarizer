@@ -1,501 +1,703 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project 03 (v2.0) — PEFT LoRA Summarization, First-Principles LLM & Hybrid RAG Platform</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>PEFT LoRA Summarizer &amp; Hybrid RAG Suite (Ops Console)</title>
     <style>
-        body { background-color: #070b14; color: #e2e8f0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.65); }
-        .tab-btn.active { background: linear-gradient(135deg, #4f46e5, #0ea5e9); color: #fff; border-color: #6366f1; box-shadow: 0 4px 18px rgba(79, 70, 229, 0.35); }
-        .mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+        /* Pre-2022 Kibana 6 / Elastic EUI Utilitarian Ops Console (2019 Light/Charcoal Split) */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "BlinkMacSystemFont", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #1a1c21;
+            font-size: 13.5px;
+            line-height: 1.48;
+        }
+        code, pre, .mono {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 12px;
+        }
+        /* Kibana-style Charcoal Top Bar */
+        .kbn-topbar {
+            background-color: #1d1e24;
+            color: #dfe5ef;
+            padding: 8px 18px;
+            border-bottom: 2px solid #00bfb3;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .kbn-brand {
+            font-weight: 700;
+            font-size: 14.5px;
+            color: #ffffff;
+        }
+        .kbn-sub {
+            color: #98a2b3;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        /* Utilitarian Flat Toolbar Navigation */
+        .kbn-nav {
+            background-color: #ffffff;
+            border-bottom: 1px solid #d3dae6;
+            padding: 0 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+        .kbn-tab {
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            padding: 9px 13px;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #343741;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .kbn-tab:hover {
+            background-color: #f5f7fa;
+            color: #006bb4;
+        }
+        .kbn-tab.active {
+            color: #006bb4;
+            border-bottom-color: #006bb4;
+            background-color: #f0f7fc;
+        }
+        /* Main Workspace */
+        .workspace {
+            max-width: 1280px;
+            margin: 14px auto;
+            padding: 0 16px 40px;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            align-items: start;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        @media (max-width: 960px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        }
+        /* EUI Flat Panel */
+        .eui-panel {
+            background-color: #ffffff;
+            border: 1px solid #d3dae6;
+            border-radius: 2px;
+            margin-bottom: 14px;
+        }
+        .eui-head {
+            background-color: #fafbfd;
+            border-bottom: 1px solid #d3dae6;
+            padding: 8px 12px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #1a1c21;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .eui-body {
+            padding: 12px;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #343741;
+            margin-bottom: 4px;
+        }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 6px 8px;
+            font-size: 12.5px;
+            border: 1px solid #c9d3e0;
+            border-radius: 2px;
+            background-color: #fbfcfe;
+            color: #1a1c21;
+            margin-bottom: 8px;
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #006bb4;
+            outline: none;
+            background-color: #ffffff;
+        }
+        .btn-blue {
+            background-color: #006bb4;
+            color: #ffffff;
+            border: 1px solid #00558f;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .btn-blue:hover { background-color: #00558f; }
+        .btn-teal {
+            background-color: #0079a5;
+            color: #ffffff;
+            border: 1px solid #005f82;
+            padding: 6px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 2px;
+            cursor: pointer;
+        }
+        .btn-outline {
+            background-color: #f5f7fa;
+            color: #343741;
+            border: 1px solid #c9d3e0;
+            padding: 4px 9px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 2px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-outline:hover { background-color: #e4e9f0; }
+        .btn-outline.active-persona {
+            background-color: #006bb4;
+            color: #ffffff;
+            border-color: #00558f;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 2px;
+            border: 1px solid transparent;
+        }
+        .badge-ok { background-color: #e6f9f7; color: #006d64; border-color: #99e5dd; }
+        .badge-warn { background-color: #fff6e5; color: #8a5300; border-color: #ffd685; }
+        .badge-err { background-color: #fce8e6; color: #a51d24; border-color: #f5b2ad; }
+        .badge-info { background-color: #e6f2fa; color: #00558f; border-color: #99cbe9; }
+
+        table.eui-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+        }
+        table.eui-table th, table.eui-table td {
+            border: 1px solid #d3dae6;
+            padding: 6px 8px;
+            text-align: left;
+        }
+        table.eui-table th {
+            background-color: #f5f7fa;
+            font-weight: 700;
+            color: #343741;
+        }
+        table.eui-table tr:nth-child(even) { background-color: #fafbfd; }
+
+        pre.log-box {
+            background-color: #1d1e24;
+            color: #dfe5ef;
+            border: 1px solid #343741;
+            padding: 10px;
+            border-radius: 2px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .callout {
+            background-color: #e6f2fa;
+            border-left: 4px solid #006bb4;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            font-size: 12.5px;
+        }
+        .hidden { display: none; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col">
-    <!-- Top Header & Navigation Bar -->
-    <header class="border-b border-slate-800 bg-slate-950/90 sticky top-0 z-50 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg">03</div>
-                <div>
-                    <div class="flex items-center gap-2">
-                        <h1 class="text-lg font-bold text-white tracking-tight">PEFT LoRA Summarizer & Hybrid RAG Suite</h1>
-                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">v2.0.0 Interactive</span>
-                    </div>
-                    <p class="text-xs text-slate-400">Flan-T5 LoRA Fine-Tuning • Qdrant + BM25 Reciprocal Rank Fusion • First-Principles BPE/LoRA • Claim Grounding Monitor</p>
-                </div>
-            </div>
-
-            <nav class="flex flex-wrap gap-1.5" id="main-nav">
-                <button onclick="switchTab('intro')" id="tab-intro" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">1. Architecture & Story</button>
-                <button onclick="switchTab('studio')" id="tab-studio" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">2. LoRA & RAG Duel Studio</button>
-                <button onclick="switchTab('chunks')" id="tab-chunks" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">3. Vector Space & Live Ingest</button>
-                <button onclick="switchTab('playground')" id="tab-playground" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">4. Prompt & First-Principles Lab</button>
-                <button onclick="switchTab('evaluation')" id="tab-evaluation" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">5. ROUGE/BLEU & RRF Benchmarks</button>
-                <button onclick="switchTab('health')" id="tab-health" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium border border-slate-700 text-slate-300 hover:bg-slate-800 transition">6. Health & Guardrail Telemetry</button>
-            </nav>
+<body>
+    <!-- Top Bar -->
+    <header class="kbn-topbar">
+        <div>
+            <span class="kbn-brand">PEFT LoRA Summarizer &amp; Hybrid RAG Suite</span>
+            <span class="kbn-sub">Flan-T5 LoRA Adapter / Qdrant + BM25 RRF / First-Principles BPE &amp; LoRA Check</span>
+        </div>
+        <div class="mono" style="font-size:11.5px;">
+            Status: <strong>{{ health_data.get('status', 'healthy') | upper }}</strong> |
+            LoRA Adapter: <strong>{{ 'Loaded' if health_data.get('lora_adapter_ready') else 'Base' }}</strong> |
+            ROUGE Gate: <strong>{{ 'PASS' if eval_data.get('ci_cd_evaluation_gate_passed', True) else 'CHECK' }}</strong>
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+    <!-- Flat Toolbar Navigation -->
+    <nav class="kbn-nav">
+        <button type="button" onclick="switchTab('studio')" id="tab-studio" class="kbn-tab">1. Log Summarizer &amp; Search Duel</button>
+        <button type="button" onclick="switchTab('chunks')" id="tab-chunks" class="kbn-tab">2. Runbook Chunks &amp; 2D SVD Plot</button>
+        <button type="button" onclick="switchTab('playground')" id="tab-playground" class="kbn-tab">3. Prompt &amp; BPE / LoRA Check</button>
+        <button type="button" onclick="switchTab('evaluation')" id="tab-evaluation" class="kbn-tab">4. ROUGE/BLEU &amp; RRF Scores</button>
+        <button type="button" onclick="switchTab('health')" id="tab-health" class="kbn-tab">5. Status &amp; Grounding Log</button>
+        <button type="button" onclick="switchTab('intro')" id="tab-intro" class="kbn-tab">6. Dev Notes</button>
+        <button type="button" onclick="switchTab('help')" id="tab-help" class="kbn-tab">7. Help &amp; Operator Guide</button>
+        <button type="button" onclick="switchTab('docs')" id="tab-docs" class="kbn-tab">8. REST API Tester (/docs)</button>
+    </nav>
+
+    <main class="workspace">
 
         <!-- ===================================================================== -->
-        <!-- PAGE 1: ARCHITECTURE & ENGINEERING STORY (/intro)                     -->
+        <!-- TAB 1: LOG SUMMARIZER & SEARCH DUEL (/studio)                         -->
         <!-- ===================================================================== -->
-        <section id="view-intro" class="tab-view hidden space-y-6">
-            <div class="glass rounded-2xl p-6 border border-indigo-500/30">
-                <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-                    <div>
-                        <span class="text-xs uppercase tracking-wider text-indigo-400 font-semibold">Portfolio Project 03 • Engineering Walkthrough</span>
-                        <h2 class="text-2xl font-bold text-white mt-1">What This Project Is & How I Engineered It From First Principles</h2>
-                    </div>
-                    <button onclick="switchTab('studio')" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-lg transition">Launch Interactive Studio →</button>
-                </div>
-                <p class="text-sm text-slate-300 leading-relaxed">
-                    Enterprise incident response and SRE teams drown in noisy multi-speaker outage transcripts and scattered architecture runbooks. Standard off-the-shelf LLMs hallucinate citations, miss domain acronyms (<code class="text-cyan-300">LoRA</code>, <code class="text-cyan-300">RRF</code>, <code class="text-cyan-300">KS-drift</code>), and cost too much to fine-tune across all weights. I built this production 6-stage NLP & Hybrid RAG platform to solve both problems: parameter-efficient fine-tuning (<strong class="text-white">PEFT LoRA on Flan-T5</strong>) for multi-persona incident summarization, coupled with a <strong class="text-white">Qdrant + BM25 Reciprocal Rank Fusion (RRF) Hybrid RAG engine</strong> with sentence-level hallucination attribution.
-                </p>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                    <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-                        <div class="text-xs font-semibold text-indigo-400 uppercase">Step 1 • First-Principles LLM Core</div>
-                        <h3 class="text-sm font-bold text-white mt-1">BPE Tokenizer, Causal MHA & LoRA Math</h3>
-                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                            Before using Hugging Face PEFT, I implemented <code class="text-slate-200">BytePairTokenizerFromScratch</code> (UTF-8 byte pair frequency merging), <code class="text-slate-200">ScaledDotProductMultiHeadAttention</code> with upper-triangular causal masking, and <code class="text-slate-200">LoRALinearFromScratch</code> ($h = W_0 x + \frac{\alpha}{r} B A x$) with zero-initialized $B=0$ so $\Delta W = 0$ at step 0.
-                        </p>
-                    </div>
-                    <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-                        <div class="text-xs font-semibold text-cyan-400 uppercase">Step 2 • PEFT LoRA & Quality Gate</div>
-                        <h3 class="text-sm font-bold text-white mt-1">98.8% Parameter Reduction + ROUGE Gate</h3>
-                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                            I fine-tuned <code class="text-slate-200">google/flan-t5-small</code> adapters on technical incident dialogues, logging every run to MLflow/DagsHub and enforcing an automated CI/CD evaluation gate (<code class="text-emerald-400">ROUGE-1 ≥ 0.32</code>, <code class="text-emerald-400">ROUGE-L ≥ 0.28</code>) before artifact promotion.
-                        </p>
-                    </div>
-                    <div class="p-4 rounded-xl bg-slate-900/90 border border-slate-800">
-                        <div class="text-xs font-semibold text-emerald-400 uppercase">Step 3 • Advanced Hybrid RRF RAG</div>
-                        <h3 class="text-sm font-bold text-white mt-1">Qdrant Dense + BM25 Lexical + Citations</h3>
-                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-                            Naive dense vectors miss exact acronyms. I built a dual-index retriever combining Qdrant cosine vectors + BM25 Okapi lexical search fused via Reciprocal Rank Fusion ($\text{RRF}(d) = \sum \frac{1}{k + r_i}$) + acronym expansion + claim-level faithfulness verification.
-                        </p>
-                    </div>
-                </div>
+        <section id="view-studio" class="tab-view hidden">
+            <div class="callout">
+                <strong>Quick Load:</strong> Click an incident preset to populate both the dialogue box and the runbook search box:
+                <button type="button" onclick="loadPreset('sre_outage')" class="btn-outline" style="margin-left:6px;">Preset 1: AWS EC2 Unpickle 500</button>
+                <button type="button" onclick="loadPreset('drift_incident')" class="btn-outline">Preset 2: KS Covariate Drift Alert</button>
+                <button type="button" onclick="loadPreset('rag_hallucination')" class="btn-outline">Preset 3: Hybrid RRF Upgrade</button>
+                <span style="float:right;">Need help? See <a href="javascript:void(0)" onclick="switchTab('help')" style="color:#006bb4;font-weight:700;">Tab 7: Help &amp; Operator Guide</a>.</span>
             </div>
 
-            <!-- 12 Interactive v2.0 Features Matrix -->
-            <div class="glass rounded-2xl p-6">
-                <h3 class="text-base font-bold text-white mb-4">12 Interactive Capabilities Engineered in v2.0.0</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">01.</span> <strong class="text-white">Multi-Persona Incident Summarizer</strong> (Executive Brief, SRE Deep-Dive, SLA Compliance Audit)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">02.</span> <strong class="text-white">Quantitative Compression Analyzer</strong> (Word reduction %, reading seconds saved, grade level)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">03.</span> <strong class="text-white">Automated Entity & Action Extractor</strong> (Speakers, stack entities, root causes & remediations)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">04.</span> <strong class="text-white">Claim-by-Claim Hallucination Highlighter</strong> (Sentence-level <code class="text-emerald-400">VERIFIED_GROUNDED</code> badges)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">05.</span> <strong class="text-white">3-Mode RAG Engine</strong> (Naive Dense vs. Pure BM25 Lexical vs. Hybrid RRF Re-Ranked)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">06.</span> <strong class="text-white">Side-by-Side Retrieval Duel</strong> (Live rank & score decomposition table across all 3 retrievers)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">07.</span> <strong class="text-white">2D SVD Vector Space Visualizer</strong> (Interactive scatter plot of indexed Qdrant chunks)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">08.</span> <strong class="text-white">Live Custom Runbook Ingestion</strong> (Index new <code class="text-cyan-300">[DOC-ID]</code> chunks into Qdrant + BM25 at runtime)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">09.</span> <strong class="text-white">Prompt Engineering Sandbox</strong> (Custom <code class="text-amber-300">{context}</code>, <code class="text-amber-300">{query}</code>, <code class="text-amber-300">{persona}</code> templates)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">10.</span> <strong class="text-white">Interactive Karpathy BPE Lab</strong> (Inspect UTF-8 byte pair merges & lossless roundtrip)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">11.</span> <strong class="text-white">Interactive LoRA & Attention Lab</strong> (Rank $r$ parameter calculator & causal mask matrix)</div>
-                    <div class="p-3 rounded-xl bg-slate-900/70 border border-slate-800"><span class="text-indigo-400 font-bold">12.</span> <strong class="text-white">Real-Time Guardrail Telemetry Audit</strong> (Latency, token cost, and hallucination alert stream)</div>
-                </div>
-            </div>
-        </section>
+            <div class="grid-2">
+                <!-- Left Panel: PEFT LoRA Dialogue Summarizer -->
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>Part A: Incident Log Summarizer (`google/flan-t5-small` + LoRA)</span>
+                        <span class="badge badge-ok">Adapter Active</span>
+                    </div>
+                    <div class="eui-body">
+                        <label>Summary Format Style:</label>
+                        <div style="display:flex; gap:6px; margin-bottom:10px;">
+                            <button type="button" onclick="setPersona('executive_brief')" data-persona="executive_brief" class="persona-btn btn-outline active-persona">Executive Brief</button>
+                            <button type="button" onclick="setPersona('sre_deep_dive')" data-persona="sre_deep_dive" class="persona-btn btn-outline">SRE Post-Mortem</button>
+                            <button type="button" onclick="setPersona('compliance_sla_audit')" data-persona="compliance_sla_audit" class="persona-btn btn-outline">SLA Audit Note</button>
+                        </div>
 
-        <!-- ===================================================================== -->
-        <!-- PAGE 2: LORA SUMMARIZER & HYBRID RAG DUEL STUDIO (/studio)            -->
-        <!-- ===================================================================== -->
-        <section id="view-studio" class="tab-view hidden space-y-6">
-            <!-- Quick Preset Bar -->
-            <div class="glass rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-400">1-Click Incident Presets:</span>
-                    <button onclick="loadPreset('sre_outage')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600/40 border border-slate-700 text-xs text-slate-200 transition">AWS EC2 Unpickle Outage</button>
-                    <button onclick="loadPreset('drift_incident')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600/40 border border-slate-700 text-xs text-slate-200 transition">KS Covariate Drift Alert</button>
-                    <button onclick="loadPreset('rag_hallucination')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-indigo-600/40 border border-slate-700 text-xs text-slate-200 transition">Hybrid RAG RRF Upgrade</button>
-                </div>
-                <span class="text-xs text-slate-400">Select a preset or paste any technical dialogue / question below</span>
-            </div>
+                        <label>Incident Chat / Ticket Transcript:</label>
+                        <textarea id="sum-dialogue" rows="5">SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during peak traffic. ML Engineer: Joblib failed to unpickle RiskDomainFeatureGenerator from __main__ inside uvicorn workers. DevOps: We moved the transformer into the installable src package with pip install -e ., rebuilt the Docker image, verified /health passes, and restored 99.98% SLA availability.</textarea>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left Column: Multi-Persona PEFT LoRA Summarizer -->
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div>
+                                <span style="font-size:12px; font-weight:600;">Max Output Tokens:</span>
+                                <input id="sum-tokens" type="number" value="80" min="20" max="180" style="width:75px; display:inline-block; margin-bottom:0;" />
+                            </div>
+                            <button type="button" onclick="runSummarizer()" id="btn-summarize" class="btn-blue">Run LoRA Summarizer</button>
+                        </div>
+
+                        <div style="border:1px solid #d3dae6; background:#fafbfd; padding:10px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                                <strong id="sum-persona-badge" style="color:#006bb4;">Executive Brief</strong>
+                                <span id="sum-faithfulness" class="badge badge-ok mono">Grounding: --</span>
+                            </div>
+                            <div id="sum-styled-text" style="font-size:13px;">Click "Run LoRA Summarizer" to condense the transcript.</div>
+                        </div>
+
+                        <div class="grid-4">
+                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
+                                <div style="font-size:11px; color:#555;">Word Cut</div>
+                                <div id="comp-ratio" class="mono" style="font-weight:700;">--%</div>
+                            </div>
+                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
+                                <div style="font-size:11px; color:#555;">Words</div>
+                                <div id="comp-words" class="mono" style="font-weight:700;">--</div>
+                            </div>
+                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
+                                <div style="font-size:11px; color:#555;">Time Saved</div>
+                                <div id="comp-time" class="mono" style="font-weight:700;">--s</div>
+                            </div>
+                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
+                                <div style="font-size:11px; color:#555;">Grade Level</div>
+                                <div id="comp-grade" class="mono" style="font-weight:700;">--</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:8px;">
+                            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Extracted Stack Terms &amp; Actions:</div>
+                            <div id="sum-entities" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px;"></div>
+                            <div id="sum-actions" style="font-size:12px; color:#343741;"></div>
+                        </div>
+
                         <div>
-                            <span class="text-xs font-semibold text-indigo-400 uppercase">Module A • PEFT LoRA Flan-T5</span>
-                            <h2 class="text-lg font-bold text-white">Multi-Persona Incident Summarizer</h2>
-                        </div>
-                        <span class="px-2.5 py-1 rounded-full text-xs bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">LoRA Adapter Active</span>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Target Summary Persona</label>
-                        <div class="grid grid-cols-3 gap-2" id="persona-selector">
-                            <button type="button" onclick="setPersona('executive_brief')" data-persona="executive_brief" class="persona-btn px-3 py-2 rounded-xl border border-indigo-500 bg-indigo-600/30 text-xs font-semibold text-white">Executive Brief</button>
-                            <button type="button" onclick="setPersona('sre_deep_dive')" data-persona="sre_deep_dive" class="persona-btn px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-300">SRE Post-Mortem</button>
-                            <button type="button" onclick="setPersona('compliance_sla_audit')" data-persona="compliance_sla_audit" class="persona-btn px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-300">SLA Audit Record</button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Technical Incident Transcript / Dialogue</label>
-                        <textarea id="sum-dialogue" rows="5" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-3 text-xs text-slate-200 focus:border-indigo-500 focus:outline-none">SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during peak traffic. ML Engineer: Joblib failed to unpickle RiskDomainFeatureGenerator from __main__ inside uvicorn workers. DevOps: We moved the transformer into the installable src package with pip install -e ., rebuilt the Docker image, verified /health passes, and restored 99.98% SLA availability.</textarea>
-                    </div>
-
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-2 text-xs text-slate-400">
-                            <span>Max New Tokens:</span>
-                            <input id="sum-tokens" type="number" value="80" min="20" max="180" class="w-20 rounded-lg bg-slate-900 border border-slate-700 px-2 py-1 text-white text-xs" />
-                        </div>
-                        <button onclick="runSummarizer()" id="btn-summarize" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-bold shadow-lg transition">Generate Persona Summary & Extract Entities</button>
-                    </div>
-
-                    <!-- Summarizer Results Area -->
-                    <div id="sum-result" class="space-y-4 pt-2 border-t border-slate-800/80">
-                        <div class="p-4 rounded-xl bg-slate-900/90 border border-indigo-500/30 space-y-2">
-                            <div class="flex items-center justify-between text-xs">
-                                <span id="sum-persona-badge" class="font-semibold text-indigo-300">Executive C-Suite Brief</span>
-                                <span id="sum-faithfulness" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Faithfulness: --</span>
-                            </div>
-                            <p id="sum-styled-text" class="text-sm text-white leading-relaxed font-medium">Click "Generate Persona Summary" to run PEFT LoRA inference, compression analysis, and claim verification.</p>
-                        </div>
-
-                        <!-- Quantitative Compression Cards -->
-                        <div class="grid grid-cols-4 gap-2 text-center">
-                            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                                <div class="text-[11px] text-slate-400">Compression</div>
-                                <div id="comp-ratio" class="text-sm font-bold text-cyan-400 mt-0.5">--%</div>
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                                <div class="text-[11px] text-slate-400">Words (Src→Sum)</div>
-                                <div id="comp-words" class="text-sm font-bold text-white mt-0.5">--</div>
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                                <div class="text-[11px] text-slate-400">Time Saved</div>
-                                <div id="comp-time" class="text-sm font-bold text-emerald-400 mt-0.5">--s</div>
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800">
-                                <div class="text-[11px] text-slate-400">Readability Grade</div>
-                                <div id="comp-grade" class="text-sm font-bold text-amber-300 mt-0.5">--</div>
-                            </div>
-                        </div>
-
-                        <!-- Extracted Entities & Action Items -->
-                        <div class="p-3.5 rounded-xl bg-slate-900/70 border border-slate-800 space-y-2 text-xs">
-                            <div class="font-semibold text-slate-300">Automated Entity & Action-Item Extraction</div>
-                            <div id="sum-entities" class="flex flex-wrap gap-1.5"></div>
-                            <div id="sum-actions" class="text-slate-400 space-y-1"></div>
-                        </div>
-
-                        <!-- Claim-by-Claim Attribution Badges -->
-                        <div class="space-y-1.5">
-                            <div class="text-xs font-semibold text-slate-400">Sentence-Level Claim Grounding Verification</div>
-                            <div id="sum-claims" class="space-y-1.5 text-xs"></div>
+                            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Sentence Grounding Check:</div>
+                            <div id="sum-claims"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Right Column: Hybrid RAG QA & 3-Way Retrieval Mode Duel -->
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between">
+                <!-- Right Panel: Hybrid RAG & 3-Way Retrieval Comparison -->
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>Part B: Runbook Search (Naive Dense vs. BM25 vs. Hybrid RRF)</span>
+                        <span class="badge badge-info">RRF k=60</span>
+                    </div>
+                    <div class="eui-body">
+                        <label>Technical Question:</label>
+                        <input id="rag-query" type="text" value="How does LoRA parameterize weight updates and why is matrix B initialized to zero?" />
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+                            <div style="flex:1;">
+                                <label>Optional Category Filter:</label>
+                                <select id="rag-category" style="margin-bottom:0;">
+                                    <option value="">All Categories</option>
+                                    <option value="llm_finetuning">llm_finetuning</option>
+                                    <option value="rag_optimization">rag_optimization</option>
+                                    <option value="data_drift">data_drift</option>
+                                    <option value="mlops_architecture">mlops_architecture</option>
+                                    <option value="transformer_math">transformer_math</option>
+                                </select>
+                            </div>
+                            <div style="padding-top:16px;">
+                                <button type="button" onclick="runRagDuel()" id="btn-rag" class="btn-teal">Search &amp; Compare 3 Modes</button>
+                            </div>
+                        </div>
+
+                        <div style="font-size:11.5px; color:#555; margin-bottom:8px;">
+                            Query Expansion: <span id="rag-expanded" class="mono" style="color:#006bb4;">--</span>
+                        </div>
+
+                        <div style="border:1px solid #d3dae6; background:#fafbfd; padding:10px; margin-bottom:10px;">
+                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                                <strong>Cited Runbook Answer</strong>
+                                <span id="rag-faithfulness" class="badge badge-ok mono">Grounding: --</span>
+                            </div>
+                            <div id="rag-answer" style="font-size:13px; margin-bottom:6px;">--</div>
+                            <div id="rag-citations" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+                        </div>
+
+                        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Side-by-Side Retriever Comparison (Top 3 Hits):</div>
+                        <div class="grid-3" style="margin-bottom:10px; font-size:12px;">
+                            <div style="border:1px solid #d3dae6; padding:6px;">
+                                <div style="font-weight:700; border-bottom:1px solid #eee; padding-bottom:3px; margin-bottom:4px;">1. Naive Dense</div>
+                                <div id="duel-naive" class="mono"></div>
+                            </div>
+                            <div style="border:1px solid #d3dae6; padding:6px;">
+                                <div style="font-weight:700; border-bottom:1px solid #eee; padding-bottom:3px; margin-bottom:4px;">2. Pure BM25</div>
+                                <div id="duel-bm25" class="mono"></div>
+                            </div>
+                            <div style="border:1px solid #0079a5; background:#f0f7fc; padding:6px;">
+                                <div style="font-weight:700; color:#00558f; border-bottom:1px solid #cce3f5; padding-bottom:3px; margin-bottom:4px;">3. Hybrid RRF</div>
+                                <div id="duel-hybrid" class="mono"></div>
+                            </div>
+                        </div>
+
                         <div>
-                            <span class="text-xs font-semibold text-cyan-400 uppercase">Module B • Qdrant + BM25 + RRF</span>
-                            <h2 class="text-lg font-bold text-white">Citation-Backed Hybrid RAG & Retrieval Duel</h2>
+                            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Answer Claim Verification:</div>
+                            <div id="rag-claims"></div>
                         </div>
-                        <span class="px-2.5 py-1 rounded-full text-xs bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">RRF k=60 + Re-Ranker</span>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs text-slate-400 mb-1">Domain Architecture Question</label>
-                            <input id="rag-query" type="text" value="How does LoRA parameterize weight updates and why is matrix B initialized to zero?" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-slate-200 focus:border-cyan-500 focus:outline-none" />
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Metadata Category Filter</label>
-                            <select id="rag-category" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-slate-200">
-                                <option value="">All Categories (Unfiltered)</option>
-                                <option value="llm_finetuning">llm_finetuning</option>
-                                <option value="rag_optimization">rag_optimization</option>
-                                <option value="data_drift">data_drift</option>
-                                <option value="mlops_architecture">mlops_architecture</option>
-                                <option value="transformer_math">transformer_math</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <div class="text-xs text-slate-400">Acronym Expansion: <span id="rag-expanded" class="text-cyan-300 mono">Automatic</span></div>
-                        <button onclick="runRagDuel()" id="btn-rag" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold shadow-lg transition">Run Hybrid RAG & 3-Mode Retrieval Duel</button>
-                    </div>
-
-                    <!-- Synthesized Cited Answer -->
-                    <div class="p-4 rounded-xl bg-slate-900/90 border border-cyan-500/30 space-y-2">
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="font-semibold text-cyan-300">Grounded Answer with Inline [DOC-ID] Citations</span>
-                            <span id="rag-faithfulness" class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">Faithfulness: --</span>
-                        </div>
-                        <p id="rag-answer" class="text-sm text-white leading-relaxed">Click "Run Hybrid RAG & 3-Mode Retrieval Duel" to compare Naive Dense vs. Pure BM25 vs. Hybrid RRF.</p>
-                        <div id="rag-citations" class="flex flex-wrap gap-1.5 pt-1"></div>
-                    </div>
-
-                    <!-- Side-by-Side 3-Way Retrieval Mode Duel Table -->
-                    <div class="space-y-2">
-                        <div class="text-xs font-semibold text-slate-300">Retrieval Mode Duel: Naive Dense vs. BM25 Lexical vs. Hybrid RRF</div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs" id="rag-duel-grid">
-                            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                                <div class="font-bold text-slate-400 mb-1">1. Naive Dense (Cosine)</div>
-                                <div id="duel-naive" class="space-y-1 text-slate-300">--</div>
-                            </div>
-                            <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                                <div class="font-bold text-amber-300 mb-1">2. Pure BM25 (Lexical)</div>
-                                <div id="duel-bm25" class="space-y-1 text-slate-300">--</div>
-                            </div>
-                            <div class="p-3 rounded-xl bg-slate-900 border border-cyan-500/40">
-                                <div class="font-bold text-cyan-300 mb-1">3. Hybrid RRF (Winner)</div>
-                                <div id="duel-hybrid" class="space-y-1 text-slate-200">--</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- RAG Claim Attribution -->
-                    <div class="space-y-1.5">
-                        <div class="text-xs font-semibold text-slate-400">RAG Claim-by-Claim Citation Entailment</div>
-                        <div id="rag-claims" class="space-y-1.5 text-xs"></div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- ===================================================================== -->
-        <!-- PAGE 3: QDRANT 2D VECTOR SPACE & LIVE INGESTION (/chunk-visualizer)   -->
+        <!-- TAB 2: RUNBOOK CHUNKS & 2D SVD PLOT (/chunk-visualizer)               -->
         <!-- ===================================================================== -->
-        <section id="view-chunks" class="tab-view hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- 2D Vector Projection Canvas -->
-                <div class="lg:col-span-2 glass rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-cyan-400 uppercase">Qdrant Vector Store • SVD 2D Projection</span>
-                            <h2 class="text-lg font-bold text-white">Interactive Knowledge Base Chunk Map</h2>
-                        </div>
-                        <button onclick="loadChunks()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-300 border border-slate-700">Refresh Projection</button>
+        <section id="view-chunks" class="tab-view hidden">
+            <div class="grid-2">
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>Indexed Runbook Chunks &amp; 2D SVD Coordinates</span>
+                        <button type="button" onclick="loadChunks()" class="btn-outline">Refresh Plot</button>
                     </div>
-                    <canvas id="vector-canvas" width="720" height="300" class="w-full rounded-xl bg-slate-950 border border-slate-800"></canvas>
-                    <div id="chunk-list" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto pr-1"></div>
+                    <div class="eui-body">
+                        <canvas id="vector-canvas" width="580" height="240" style="width:100%; border:1px solid #d3dae6; background:#ffffff; margin-bottom:10px;"></canvas>
+                        <div id="chunk-list" style="max-height:320px; overflow-y:auto;"></div>
+                    </div>
                 </div>
 
-                <!-- Live Custom Runbook Ingestion Form -->
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div>
-                        <span class="text-xs font-semibold text-emerald-400 uppercase">Runtime Indexing</span>
-                        <h2 class="text-lg font-bold text-white">Ingest Custom Engineering Doc</h2>
-                        <p class="text-xs text-slate-400 mt-1">Immediately embeds your document into the in-memory Qdrant vector collection and rebuilds the BM25 Okapi index.</p>
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>Add Custom Runbook Chunk to Qdrant + BM25</span>
+                        <span class="badge badge-ok">In-Memory Reindex</span>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Document Title</label>
-                        <input id="ing-title" type="text" value="FlashAttention-2 IO-Aware GPU Kernel Optimization" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-white" />
+                    <div class="eui-body">
+                        <p style="font-size:12.5px; margin-bottom:10px;">
+                            Adding a paragraph here assigns the next `[DOC-xxx]` tag, refits the TF-IDF/SVD vector projection, upserts points into Qdrant, and updates the BM25 token index.
+                        </p>
+                        <label>Chunk Title:</label>
+                        <input id="ing-title" type="text" value="FlashAttention-2 GPU SRAM Tiling" />
+                        <label>Category Tag:</label>
+                        <input id="ing-category" type="text" value="transformer_math" />
+                        <label>Source Reference:</label>
+                        <input id="ing-source" type="text" value="GPU Systems Notes" />
+                        <label>Runbook Paragraph:</label>
+                        <textarea id="ing-text" rows="4">FlashAttention-2 tiles Q, K, and V blocks into on-chip GPU SRAM so the quadratic N x N attention matrix is never written out to slow HBM memory.</textarea>
+                        <button type="button" onclick="ingestCustomChunk()" class="btn-blue">Index Chunk Now</button>
+                        <div id="ing-status" class="mono" style="margin-top:8px; color:#006d64; font-weight:700;"></div>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Category Tag</label>
-                        <input id="ing-category" type="text" value="transformer_math" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-white" />
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Citation Source</label>
-                        <input id="ing-source" type="text" value="Dao et al. / GPU Systems Runbook" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-white" />
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Technical Chunk Content</label>
-                        <textarea id="ing-text" rows="4" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-white">FlashAttention-2 tiles Q, K, V blocks into GPU SRAM to avoid materializing the quadratic N x N attention matrix in HBM, achieving 2x speedup and linear memory scaling with sequence length.</textarea>
-                    </div>
-                    <button onclick="ingestCustomChunk()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg transition">Index Chunk into Qdrant + BM25</button>
-                    <div id="ing-status" class="text-xs text-emerald-300 mono"></div>
                 </div>
             </div>
         </section>
 
         <!-- ===================================================================== -->
-        <!-- PAGE 4: PROMPT PLAYGROUND & FIRST-PRINCIPLES LAB (/prompt-playground) -->
+        <!-- TAB 3: PROMPT & BPE / LORA CHECK (/prompt-playground)                 -->
         <!-- ===================================================================== -->
-        <section id="view-playground" class="tab-view hidden space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Left: Custom Prompt Engineering Sandbox -->
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div>
-                        <span class="text-xs font-semibold text-amber-400 uppercase">Feature 09 • Prompt Engineering Sandbox</span>
-                        <h2 class="text-lg font-bold text-white">Custom RAG Prompt Template Playground</h2>
+        <section id="view-playground" class="tab-view hidden">
+            <div class="grid-2">
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>Prompt Template Tester (`{context}`, `{query}`, `{persona}`)</span>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Query</label>
-                        <input id="pg-query" type="text" value="How does Reciprocal Rank Fusion combine Qdrant dense search and BM25?" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-white" />
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Prompt Template (supports <code class="text-amber-300">{context}</code>, <code class="text-amber-300">{query}</code>, <code class="text-amber-300">{persona}</code>)</label>
-                        <textarea id="pg-template" rows="5" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-3 text-xs text-slate-200 mono">You are a Principal AI Architect writing a {persona}.
-Retrieved Grounded Context:
+                    <div class="eui-body">
+                        <label>Question:</label>
+                        <input id="pg-query" type="text" value="How does Reciprocal Rank Fusion combine Qdrant dense search and BM25?" />
+                        <label>Prompt Template:</label>
+                        <textarea id="pg-template" rows="5" class="mono">Role: {persona}
+Context Chunks:
 {context}
 
-User Question: {query}
-Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
-                    </div>
-                    <button onclick="runPromptPlayground()" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold shadow-lg transition">Render Prompt & Evaluate Faithfulness</button>
-                    <div id="pg-output" class="space-y-3 pt-2 border-t border-slate-800 text-xs"></div>
-                </div>
-
-                <!-- Right: First-Principles BPE, Causal Attention & LoRA Lab -->
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div>
-                        <span class="text-xs font-semibold text-indigo-400 uppercase">Features 10 & 11 • Andrej Karpathy & Umar Jamil Math Lab</span>
-                        <h2 class="text-lg font-bold text-white">First-Principles BPE Tokenizer, Causal MHA & LoRA Lab</h2>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Corpus Sample for UTF-8 Byte-Pair Encoding</label>
-                        <input id="fp-text" type="text" value="mlops pipeline dvc mlops pipeline dvc lora rag attention" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-xs text-white" />
-                    </div>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">Target BPE Vocab</label>
-                            <input id="fp-vocab" type="number" value="268" min="257" max="310" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2 text-xs text-white" />
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">LoRA Rank (r)</label>
-                            <input id="fp-r" type="number" value="8" min="1" max="64" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2 text-xs text-white" />
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-400 mb-1">LoRA Alpha (α)</label>
-                            <input id="fp-alpha" type="number" value="16" min="1" max="128" class="w-full rounded-xl bg-slate-950 border border-slate-800 p-2 text-xs text-white" />
-                        </div>
-                    </div>
-                    <button onclick="runFirstPrinciplesLab()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg transition">Run BPE Merge Tree & LoRA Zero-Init Verification</button>
-                    <div id="fp-output" class="space-y-3 pt-2 border-t border-slate-800 text-xs"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===================================================================== -->
-        <!-- PAGE 5: ROUGE/BLEU GATES & HYBRID RAG BENCHMARK (/evaluation-hub)     -->
-        <!-- ===================================================================== -->
-        <section id="view-evaluation" class="tab-view hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-indigo-400 uppercase">Stage 05 • Fine-Tuned Summarizer Gate</span>
-                            <h2 class="text-lg font-bold text-white">PEFT LoRA ROUGE & BLEU Evaluation</h2>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            GATE PASSED: {{ eval_data.get('ci_cd_evaluation_gate_passed', True) }}
-                        </span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                            <div class="text-slate-400">ROUGE-1 F1</div>
-                            <div class="text-xl font-bold text-white mt-1">{{ eval_data.get('metrics', {}).get('rouge1', 0.5621) }}</div>
-                        </div>
-                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                            <div class="text-slate-400">ROUGE-2 F1</div>
-                            <div class="text-xl font-bold text-indigo-400 mt-1">{{ eval_data.get('metrics', {}).get('rouge2', 0.3412) }}</div>
-                        </div>
-                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                            <div class="text-slate-400">ROUGE-L F1</div>
-                            <div class="text-xl font-bold text-cyan-400 mt-1">{{ eval_data.get('metrics', {}).get('rougeL', 0.4985) }}</div>
-                        </div>
-                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
-                            <div class="text-slate-400">BLEU Score</div>
-                            <div class="text-xl font-bold text-emerald-400 mt-1">{{ eval_data.get('metrics', {}).get('bleu', 0.2845) }}</div>
-                        </div>
+Question: {query}
+Answer with [DOC-ID] tags:</textarea>
+                        <button type="button" onclick="runPromptPlayground()" class="btn-blue">Render Prompt &amp; Score Grounding</button>
+                        <div id="pg-output" style="margin-top:10px;"></div>
                     </div>
                 </div>
 
-                <div class="glass rounded-2xl p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-xs font-semibold text-cyan-400 uppercase">Stage 06 • Retrieval Benchmark</span>
-                            <h2 class="text-lg font-bold text-white">Naive Dense vs. Hybrid RRF RAG</h2>
-                        </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                            MRR Boost: +{{ rag_data.get('mrr_improvement', 0.1667) }}
-                        </span>
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>First-Principles BPE Tokenizer, Causal Mask &amp; LoRA Check</span>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs">
-                        <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                            <div class="font-bold text-slate-400">Naive Dense Baseline</div>
-                            <div>HitRate@1: <strong class="text-white">{{ rag_data.get('naive_dense_rag', {}).get('hit_rate_at_1', 0.8333) }}</strong></div>
-                            <div>Recall@3: <strong class="text-white">{{ rag_data.get('naive_dense_rag', {}).get('recall_at_3', 0.8333) }}</strong></div>
-                            <div>MRR: <strong class="text-white">{{ rag_data.get('naive_dense_rag', {}).get('mrr', 0.8333) }}</strong></div>
+                    <div class="eui-body">
+                        <label>Sample String for UTF-8 Byte-Pair Merging (`BytePairTokenizerFromScratch`):</label>
+                        <input id="fp-text" type="text" value="mlops pipeline dvc mlops pipeline dvc lora rag attention" />
+                        <div class="grid-3">
+                            <div><label>Target Vocab Size:</label><input id="fp-vocab" type="number" value="268" min="257" max="310" /></div>
+                            <div><label>LoRA Rank (`r`):</label><input id="fp-r" type="number" value="8" min="1" max="64" /></div>
+                            <div><label>LoRA Alpha:</label><input id="fp-alpha" type="number" value="16" min="1" max="128" /></div>
                         </div>
-                        <div class="p-3.5 rounded-xl bg-slate-900 border border-cyan-500/40 space-y-1">
-                            <div class="font-bold text-cyan-300">Advanced Hybrid RRF</div>
-                            <div>HitRate@1: <strong class="text-emerald-400">{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('hit_rate_at_1', 1.0) }}</strong></div>
-                            <div>Recall@3: <strong class="text-emerald-400">{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('recall_at_3', 1.0) }}</strong></div>
-                            <div>MRR: <strong class="text-emerald-400">{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('mrr', 1.0) }}</strong></div>
-                        </div>
+                        <button type="button" onclick="runFirstPrinciplesLab()" class="btn-teal">Run BPE Merges &amp; LoRA Step-0 Check</button>
+                        <div id="fp-output" style="margin-top:10px;"></div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- ===================================================================== -->
-        <!-- PAGE 6: SYSTEM READINESS & TELEMETRY AUDIT LOG (/health)              -->
+        <!-- TAB 4: ROUGE/BLEU & RRF SCORES (/evaluation-hub)                      -->
         <!-- ===================================================================== -->
-        <section id="view-health" class="tab-view hidden space-y-6">
-            <div class="glass rounded-2xl p-6 space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <span class="text-xs font-semibold text-emerald-400 uppercase">Stage 07 • Production Readiness & Guardrail Monitor</span>
-                        <h2 class="text-lg font-bold text-white">System Health & Real-Time Hallucination Telemetry</h2>
+        <section id="view-evaluation" class="tab-view hidden">
+            <div class="grid-2">
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>LoRA Summarizer Validation Metrics (`evaluation_report.json`)</span>
+                        <span class="badge badge-ok">Gate Passed: {{ eval_data.get('ci_cd_evaluation_gate_passed', True) }}</span>
                     </div>
-                    <a href="/metrics?format=json" target="_blank" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-cyan-300 border border-slate-700">Raw JSON Metrics ↗</a>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
-                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">Service Status</div>
-                        <div class="text-lg font-bold text-emerald-400 mt-1 uppercase">{{ health_data.get('status', 'healthy') }}</div>
-                    </div>
-                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">Total Logged Requests</div>
-                        <div class="text-lg font-bold text-white mt-1">{{ mon_data.get('total_requests_logged', 0) }}</div>
-                    </div>
-                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">Mean Faithfulness Score</div>
-                        <div class="text-lg font-bold text-cyan-400 mt-1">{{ mon_data.get('avg_faithfulness_score', 0.92) }}</div>
-                    </div>
-                    <div class="p-4 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">Hallucination Alerts</div>
-                        <div class="text-lg font-bold text-amber-400 mt-1">{{ mon_data.get('hallucination_alert_count', 0) }}</div>
+                    <div class="eui-body">
+                        <table class="eui-table">
+                            <tr><th>ROUGE-1 F1</th><td class="mono"><strong>{{ eval_data.get('metrics', {}).get('rouge1', 0.5621) }}</strong> (Gate &gt;= 0.32)</td></tr>
+                            <tr><th>ROUGE-2 F1</th><td class="mono">{{ eval_data.get('metrics', {}).get('rouge2', 0.3412) }}</td></tr>
+                            <tr><th>ROUGE-L F1</th><td class="mono"><strong>{{ eval_data.get('metrics', {}).get('rougeL', 0.4985) }}</strong> (Gate &gt;= 0.28)</td></tr>
+                            <tr><th>BLEU Score</th><td class="mono">{{ eval_data.get('metrics', {}).get('bleu', 0.2845) }}</td></tr>
+                        </table>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs border-collapse">
+                <div class="eui-panel">
+                    <div class="eui-head">
+                        <span>Retrieval Benchmark (`rag_benchmark_report.json`)</span>
+                        <span class="badge badge-info">MRR Gain: +{{ rag_data.get('mrr_improvement', 0.1667) }}</span>
+                    </div>
+                    <div class="eui-body">
+                        <table class="eui-table">
+                            <thead>
+                                <tr><th>Metric</th><th>Naive Dense Search</th><th>Hybrid Qdrant + BM25 RRF</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>HitRate@1</th>
+                                    <td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('hit_rate_at_1', 0.8333) }}</td>
+                                    <td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('hit_rate_at_1', 1.0) }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Recall@3</th>
+                                    <td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('recall_at_3', 0.8333) }}</td>
+                                    <td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('recall_at_3', 1.0) }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <th>Mean Reciprocal Rank (MRR)</th>
+                                    <td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('mrr', 0.8333) }}</td>
+                                    <td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('mrr', 1.0) }}</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 5: STATUS & GROUNDING LOG (/health)                               -->
+        <!-- ===================================================================== -->
+        <section id="view-health" class="tab-view hidden">
+            <div class="eui-panel">
+                <div class="eui-head">
+                    <span>Service Readiness &amp; Grounding Audit Log (`llm_telemetry_logs.jsonl`)</span>
+                    <a href="/metrics?format=json" target="_blank" class="btn-outline">Raw /metrics JSON</a>
+                </div>
+                <div class="eui-body">
+                    <div class="grid-4">
+                        <div style="border:1px solid #d3dae6; padding:8px;">
+                            <div style="font-size:11px; color:#555;">Service Status</div>
+                            <div class="mono" style="font-size:16px; font-weight:700; color:#006d64;">{{ health_data.get('status', 'healthy') | upper }}</div>
+                        </div>
+                        <div style="border:1px solid #d3dae6; padding:8px;">
+                            <div style="font-size:11px; color:#555;">Logged Calls</div>
+                            <div class="mono" style="font-size:16px; font-weight:700;">{{ mon_data.get('total_requests_logged', 0) }}</div>
+                        </div>
+                        <div style="border:1px solid #d3dae6; padding:8px;">
+                            <div style="font-size:11px; color:#555;">Mean Grounding</div>
+                            <div class="mono" style="font-size:16px; font-weight:700;">{{ mon_data.get('avg_faithfulness_score', 0.92) }}</div>
+                        </div>
+                        <div style="border:1px solid #d3dae6; padding:8px;">
+                            <div style="font-size:11px; color:#555;">Low-Grounding Flags</div>
+                            <div class="mono" style="font-size:16px; font-weight:700;">{{ mon_data.get('hallucination_alert_count', 0) }}</div>
+                        </div>
+                    </div>
+
+                    <table class="eui-table">
                         <thead>
-                            <tr class="border-b border-slate-800 text-slate-400">
-                                <th class="py-2 px-3">Timestamp (UTC)</th>
-                                <th class="py-2 px-3">Endpoint</th>
-                                <th class="py-2 px-3">Tokens</th>
-                                <th class="py-2 px-3">Latency (ms)</th>
-                                <th class="py-2 px-3">Faithfulness</th>
-                                <th class="py-2 px-3">Guardrail Status</th>
-                            </tr>
+                            <tr><th>Timestamp (UTC)</th><th>Endpoint</th><th>Tokens</th><th>Latency</th><th>Grounding Overlap</th><th>Status</th></tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-800/60">
+                        <tbody>
                             {% for row in telemetry_logs %}
                             <tr>
-                                <td class="py-2 px-3 mono text-slate-400">{{ row.timestamp_utc[:19] }}</td>
-                                <td class="py-2 px-3 font-semibold text-indigo-300">{{ row.endpoint }}</td>
-                                <td class="py-2 px-3">{{ row.total_tokens }}</td>
-                                <td class="py-2 px-3">{{ row.latency_ms }} ms</td>
-                                <td class="py-2 px-3 font-mono text-emerald-300">{{ row.faithfulness_score }}</td>
-                                <td class="py-2 px-3">
+                                <td class="mono">{{ row.timestamp_utc[:19] }}</td>
+                                <td class="mono"><strong>{{ row.endpoint }}</strong></td>
+                                <td class="mono">{{ row.total_tokens }}</td>
+                                <td class="mono">{{ row.latency_ms }} ms</td>
+                                <td class="mono">{{ row.faithfulness_score }}</td>
+                                <td>
                                     {% if row.hallucination_alert %}
-                                    <span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">ALERT</span>
+                                    <span class="badge badge-err">FLAGGED (&lt;0.45)</span>
                                     {% else %}
-                                    <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">GROUNDED</span>
+                                    <span class="badge badge-ok">GROUNDED</span>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 6: DEV NOTES (/intro)                                             -->
+        <!-- ===================================================================== -->
+        <section id="view-intro" class="tab-view hidden">
+            <div class="eui-panel">
+                <div class="eui-head">
+                    <span>Developer Notes: Building the Summarizer &amp; Hybrid Search Pipeline</span>
+                    <span class="mono">v2.0.0</span>
+                </div>
+                <div class="eui-body" style="line-height:1.65;">
+                    <p style="margin-bottom:10px;">
+                        When an outage hits, nobody wants to read 80 lines of Slack back-and-forth just to find out which container broke and what fixed it. At the same time, searching internal runbooks with plain dense embeddings fails surprisingly often on short acronyms like `LoRA`, `RRF`, `DVC`, or `KS` because subword tokenizers split unfamiliar acronyms into noisy fragments.
+                    </p>
+                    <p style="margin-bottom:10px;">
+                        I built this repo in three parts:
+                    </p>
+                    <table class="eui-table">
+                        <tr>
+                            <th style="width:240px;">1. First-Principles Modules (`first_principles_llm.py`)</th>
+                            <td>Implements `BytePairTokenizerFromScratch` over raw UTF-8 byte sequences (0..255), `ScaledDotProductMultiHeadAttention` with upper-triangular `-inf` masking, and `LoRALinearFromScratch` (`W_0 x + (alpha/r) B A x`). Matrix `B` is initialized to zeros so the adapter starts as an exact identity function at step 0.</td>
+                        </tr>
+                        <tr>
+                            <th>2. Flan-T5 LoRA Fine-Tuning (`model_trainer.py`)</th>
+                            <td>Freezes `google/flan-t5-small` base weights and trains low-rank adapters (`r=8, alpha=16`) on incident transcripts, cutting trainable parameters by ~98.8% and checking ROUGE-1/ROUGE-L gates before saving.</td>
+                        </tr>
+                        <tr>
+                            <th>3. Qdrant + BM25 RRF (`rag_engine.py`)</th>
+                            <td>Runs acronym query expansion, queries both Qdrant cosine vectors and BM25 Okapi lexical scores, combines ranks via Reciprocal Rank Fusion (`1/(60 + r_dense) + 1/(60 + r_bm25)`), and checks every sentence in the output for content-word overlap against the retrieved `[DOC-ID]` chunks.</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 7: HELP & OPERATOR GUIDE (/help)                                  -->
+        <!-- ===================================================================== -->
+        <section id="view-help" class="tab-view hidden">
+            <div class="eui-panel">
+                <div class="eui-head">
+                    <span>Help &amp; Operator Guide: How to Use Every Tab</span>
+                    <span class="badge badge-ok">User Manual</span>
+                </div>
+                <div class="eui-body" style="line-height:1.65;">
+                    <h4 style="color:#006bb4; margin-bottom:4px;">1. Summarizing Incident Logs (Tab 1, Left Panel)</h4>
+                    <ul style="margin-left:20px; margin-bottom:12px;">
+                        <li>Click one of the three <strong>Preset</strong> buttons in the blue bar at the top, or paste any multi-speaker chat log into the transcript box.</li>
+                        <li>Pick a format style (<strong>Executive Brief</strong>, <strong>SRE Post-Mortem</strong>, or <strong>SLA Audit Note</strong>) and click <strong>Run LoRA Summarizer</strong>.</li>
+                        <li>Check the <strong>Sentence Grounding Check</strong> at the bottom of the panel: sentences with `&gt;= 65%` content-word overlap with your source transcript get a green `VERIFIED_GROUNDED` badge.</li>
+                    </ul>
+
+                    <h4 style="color:#006bb4; margin-bottom:4px;">2. Comparing Naive Dense vs. BM25 vs. Hybrid RRF (Tab 1, Right Panel)</h4>
+                    <ul style="margin-left:20px; margin-bottom:12px;">
+                        <li>Enter a technical question (try including acronyms like `LoRA`, `RRF`, or `KS`) and click <strong>Search &amp; Compare 3 Modes</strong>.</li>
+                        <li>Look at the 3-column table under <strong>Side-by-Side Retriever Comparison</strong> to see which `[DOC-ID]` chunks Naive Dense, Pure BM25, and Hybrid RRF ranked #1, #2, and #3.</li>
+                    </ul>
+
+                    <h4 style="color:#006bb4; margin-bottom:4px;">3. Indexing New Runbooks &amp; Testing BPE / LoRA Math (Tabs 2 &amp; 3)</h4>
+                    <ul style="margin-left:20px; margin-bottom:12px;">
+                        <li>In <strong>Tab 2</strong>, fill out the right-hand form and click <strong>Index Chunk Now</strong> to add a new `[DOC-xxx]` entry into Qdrant and BM25.</li>
+                        <li>In <strong>Tab 3</strong>, test custom `{context}` / `{query}` prompt templates on the left, or inspect the UTF-8 byte-pair merge table and LoRA parameter reduction calculator on the right.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- TAB 8: BUILT-IN INTERACTIVE REST API TESTER (/docs)                   -->
+        <!-- ===================================================================== -->
+        <section id="view-docs" class="tab-view hidden">
+            <div class="eui-panel">
+                <div class="eui-head">
+                    <span>Interactive REST API Tester (`/docs`)</span>
+                    <div>
+                        <a href="/openapi.json" target="_blank" class="btn-outline">Raw /openapi.json</a>
+                        <a href="/swagger-raw" target="_blank" class="btn-outline">CDN Swagger (/swagger-raw)</a>
+                    </div>
+                </div>
+                <div class="eui-body">
+                    <p style="margin-bottom:10px;">
+                        Send live HTTP requests to the FastAPI backend directly from this panel (no external CDN scripts needed).
+                    </p>
+                    <div class="grid-2">
+                        <div>
+                            <div style="border:1px solid #d3dae6; padding:10px; margin-bottom:8px;">
+                                <strong>GET /health</strong> &amp; <strong>GET /metrics</strong>
+                                <div style="margin-top:6px; display:flex; gap:6px;">
+                                    <button type="button" class="btn-blue" onclick="callApi('GET', '/health?format=json')">GET /health</button>
+                                    <button type="button" class="btn-blue" onclick="callApi('GET', '/metrics?format=json')">GET /metrics</button>
+                                </div>
+                            </div>
+                            <div style="border:1px solid #d3dae6; padding:10px; margin-bottom:8px;">
+                                <strong>POST /summarize</strong>
+                                <button type="button" class="btn-blue" style="margin-top:6px; display:block;" onclick="callSumApi()">Send Sample POST /summarize</button>
+                            </div>
+                            <div style="border:1px solid #d3dae6; padding:10px;">
+                                <strong>POST /rag-qa</strong>
+                                <button type="button" class="btn-teal" style="margin-top:6px; display:block;" onclick="callRagApi()">Send Sample POST /rag-qa</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label>HTTP Response Inspector:</label>
+                            <pre id="api-out-box" class="log-box" style="min-height:260px; max-height:420px; overflow-y:auto;">Click a button on the left to inspect the JSON response.</pre>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -509,7 +711,7 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.kbn-tab').forEach(el => el.classList.remove('active'));
             const view = document.getElementById('view-' + tab) || document.getElementById('view-studio');
             const btn = document.getElementById('tab-' + tab) || document.getElementById('tab-studio');
             view.classList.remove('hidden');
@@ -522,9 +724,9 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
             currentPersona = p;
             document.querySelectorAll('.persona-btn').forEach(b => {
                 if (b.dataset.persona === p) {
-                    b.className = "persona-btn px-3 py-2 rounded-xl border border-indigo-500 bg-indigo-600/30 text-xs font-semibold text-white";
+                    b.classList.add('active-persona');
                 } else {
-                    b.className = "persona-btn px-3 py-2 rounded-xl border border-slate-700 bg-slate-900 text-xs font-semibold text-slate-300";
+                    b.classList.remove('active-persona');
                 }
             });
         }
@@ -542,22 +744,17 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
             const box = document.getElementById(containerId);
             if (!claims || !claims.length) { box.innerHTML = ''; return; }
             box.innerHTML = claims.map(c => {
-                const colorMap = {
-                    emerald: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-                    amber: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-                    rose: 'bg-rose-500/15 text-rose-300 border-rose-500/30'
-                };
-                const cls = colorMap[c.badge_color] || colorMap.emerald;
-                return `<div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-start justify-between gap-3">
-                    <span class="text-slate-200">${c.sentence}</span>
-                    <span class="shrink-0 px-2 py-0.5 rounded border text-[10px] font-bold ${cls}">${c.verdict} (${Math.round(c.grounding_score*100)}%)</span>
+                const cls = c.badge_color === 'emerald' ? 'badge-ok' : (c.badge_color === 'amber' ? 'badge-warn' : 'badge-err');
+                return `<div style="border:1px solid #d3dae6; padding:6px 8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff;">
+                    <span style="font-size:12px;">${c.sentence}</span>
+                    <span class="badge ${cls} mono">${c.verdict} (${Math.round(c.grounding_score*100)}%)</span>
                 </div>`;
             }).join('');
         }
 
         async function runSummarizer() {
             const btn = document.getElementById('btn-summarize');
-            btn.textContent = 'Running LoRA Inference...';
+            btn.textContent = 'Running...';
             try {
                 const res = await fetch('/summarize', {
                     method: 'POST',
@@ -571,31 +768,31 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
                 const data = await res.json();
                 document.getElementById('sum-persona-badge').textContent = data.persona_label || 'Summary';
                 document.getElementById('sum-styled-text').textContent = data.styled_summary || data.summary;
-                document.getElementById('sum-faithfulness').textContent = `Faithfulness: ${(data.faithfulness_score * 100).toFixed(1)}%`;
+                document.getElementById('sum-faithfulness').textContent = `Grounding: ${(data.faithfulness_score * 100).toFixed(1)}%`;
 
                 const cm = data.compression_metrics || {};
                 document.getElementById('comp-ratio').textContent = `${cm.compression_reduction_pct ?? 0}%`;
-                document.getElementById('comp-words').textContent = `${cm.source_word_count ?? 0} → ${cm.summary_word_count ?? 0}`;
+                document.getElementById('comp-words').textContent = `${cm.source_word_count ?? 0}->${cm.summary_word_count ?? 0}`;
                 document.getElementById('comp-time').textContent = `${cm.reading_time_saved_sec ?? 0}s`;
-                document.getElementById('comp-grade').textContent = `Grade ${cm.estimated_grade_level ?? 10}`;
+                document.getElementById('comp-grade').textContent = `${cm.estimated_grade_level ?? 10}`;
 
                 const ext = data.structured_extraction || {};
                 document.getElementById('sum-entities').innerHTML = (ext.technical_entities || []).map(e =>
-                    `<span class="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">${e}</span>`
+                    `<span class="badge badge-info mono">${e}</span>`
                 ).join('');
                 document.getElementById('sum-actions').innerHTML = (ext.remediation_action_items || []).map(a =>
-                    `<div>• <strong class="text-emerald-300">Action:</strong> ${a}</div>`
+                    `<div>- <strong>Action:</strong> ${a}</div>`
                 ).join('');
 
                 renderClaimBadges(data.claim_attributions || [], 'sum-claims');
             } finally {
-                btn.textContent = 'Generate Persona Summary & Extract Entities';
+                btn.textContent = 'Run LoRA Summarizer';
             }
         }
 
         async function runRagDuel() {
             const btn = document.getElementById('btn-rag');
-            btn.textContent = 'Retrieving & Fusing...';
+            btn.textContent = 'Searching...';
             try {
                 const cat = document.getElementById('rag-category').value || null;
                 const res = await fetch('/api/rag-duel', {
@@ -610,25 +807,25 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
                 const data = await res.json();
                 document.getElementById('rag-expanded').textContent = data.expanded_query || data.query;
                 document.getElementById('rag-answer').textContent = data.answer;
-                document.getElementById('rag-faithfulness').textContent = `Faithfulness: ${(data.faithfulness_score * 100).toFixed(1)}%`;
+                document.getElementById('rag-faithfulness').textContent = `Grounding: ${(data.faithfulness_score * 100).toFixed(1)}%`;
                 document.getElementById('rag-citations').innerHTML = (data.citations || []).map(c =>
-                    `<span class="px-2.5 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-xs font-mono">[${c.doc_id}] ${c.title} (${c.rerank_score})</span>`
+                    `<span class="badge badge-info mono">[${c.doc_id}] ${c.title} (${c.rerank_score})</span>`
                 ).join('');
 
                 const mc = data.mode_comparison || {};
                 document.getElementById('duel-naive').innerHTML = (mc.naive_dense || []).map(r =>
-                    `<div class="p-1.5 rounded bg-slate-950">#${r.rank} <span class="text-indigo-300 mono">[${r.doc_id}]</span> ${r.title.slice(0,28)}.. <span class="text-slate-400">(${r.score})</span></div>`
+                    `<div style="margin-bottom:3px;">#${r.rank} [${r.doc_id}] (${r.score})</div>`
                 ).join('');
                 document.getElementById('duel-bm25').innerHTML = (mc.bm25_lexical || []).map(r =>
-                    `<div class="p-1.5 rounded bg-slate-950">#${r.rank} <span class="text-amber-300 mono">[${r.doc_id}]</span> ${r.title.slice(0,28)}.. <span class="text-slate-400">(${r.score})</span></div>`
+                    `<div style="margin-bottom:3px;">#${r.rank} [${r.doc_id}] (${r.score})</div>`
                 ).join('');
                 document.getElementById('duel-hybrid').innerHTML = (mc.hybrid_rrf || []).map(r =>
-                    `<div class="p-1.5 rounded bg-slate-950 border border-cyan-500/30">#${r.rank} <span class="text-cyan-300 font-bold mono">[${r.doc_id}]</span> ${r.title.slice(0,28)}.. <span class="text-emerald-300">(${r.rerank_score})</span></div>`
+                    `<div style="margin-bottom:3px;"><strong>#${r.rank} [${r.doc_id}]</strong> (${r.rerank_score})</div>`
                 ).join('');
 
                 renderClaimBadges(data.claim_attributions || [], 'rag-claims');
             } finally {
-                btn.textContent = 'Run Hybrid RAG & 3-Mode Retrieval Duel';
+                btn.textContent = 'Search & Compare 3 Modes';
             }
         }
 
@@ -640,32 +837,29 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw grid
-            ctx.strokeStyle = '#1e293b';
-            for (let x = 40; x < canvas.width; x += 80) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-            for (let y = 40; y < canvas.height; y += 60) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
+            ctx.strokeStyle = '#e4e9f0';
+            for (let x = 40; x < canvas.width; x += 70) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
+            for (let y = 30; y < canvas.height; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
 
-            chunks.forEach((c, i) => {
-                const px = 80 + ((c.x + 0.6) / 1.4) * (canvas.width - 160);
-                const py = 50 + ((c.y + 0.6) / 1.4) * (canvas.height - 100);
+            chunks.forEach(c => {
+                const px = 60 + ((c.x + 0.6) / 1.4) * (canvas.width - 140);
+                const py = 35 + ((c.y + 0.6) / 1.4) * (canvas.height - 70);
                 ctx.beginPath();
-                ctx.arc(px, py, 8, 0, Math.PI * 2);
-                ctx.fillStyle = '#06b6d4';
+                ctx.arc(px, py, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#006bb4';
                 ctx.fill();
-                ctx.fillStyle = '#e2e8f0';
+                ctx.fillStyle = '#1a1c21';
                 ctx.font = '11px monospace';
-                ctx.fillText(`[${c.doc_id}] ${c.title.slice(0, 22)}`, px + 12, py + 4);
+                ctx.fillText(`[${c.doc_id}]`, px + 8, py + 4);
             });
 
             document.getElementById('chunk-list').innerHTML = chunks.map(c =>
-                `<div class="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1 text-xs">
-                    <div class="flex items-center justify-between">
-                        <span class="font-bold text-cyan-300 mono">[${c.doc_id}]</span>
-                        <span class="px-2 py-0.5 rounded bg-slate-800 text-slate-300">${c.category}</span>
+                `<div style="border:1px solid #d3dae6; padding:8px; margin-bottom:6px; background:#fafbfd;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <strong class="mono">[${c.doc_id}] ${c.title}</strong>
+                        <span class="badge badge-info">${c.category}</span>
                     </div>
-                    <div class="font-semibold text-white">${c.title}</div>
-                    <p class="text-slate-400">${c.chunk_text}</p>
-                    <div class="text-[11px] text-slate-500 mono">SVD Coords: (${c.x}, ${c.y}) • Tokens: ${c.token_count}</div>
+                    <div style="font-size:12px; margin-top:4px;">${c.chunk_text}</div>
                 </div>`
             ).join('');
         }
@@ -682,7 +876,7 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
                 })
             });
             const data = await res.json();
-            document.getElementById('ing-status').textContent = `✓ Indexed [${data.ingested_chunk.doc_id}] — Total Chunks: ${data.total_indexed_chunks}`;
+            document.getElementById('ing-status').textContent = `Indexed [${data.ingested_chunk.doc_id}] (Total Chunks: ${data.total_indexed_chunks})`;
             loadChunks();
         }
 
@@ -699,11 +893,11 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
             });
             const data = await res.json();
             document.getElementById('pg-output').innerHTML = `
-                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800">
-                    <div class="text-amber-300 font-semibold mb-1">Synthesized Output (Faithfulness: ${(data.faithfulness_score*100).toFixed(1)}% | Latency: ${data.latency_ms} ms)</div>
-                    <p class="text-white">${data.synthesized_response}</p>
+                <div style="border:1px solid #d3dae6; padding:8px; background:#fafbfd; margin-bottom:6px;">
+                    <strong>Output (Grounding: ${(data.faithfulness_score*100).toFixed(1)}% | ${data.latency_ms} ms):</strong>
+                    <div style="margin-top:4px;">${data.synthesized_response}</div>
                 </div>
-                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 mono text-[11px] text-slate-400 whitespace-pre-wrap">${data.rendered_prompt}</div>
+                <pre class="log-box">${data.rendered_prompt}</pre>
             `;
         }
 
@@ -725,27 +919,44 @@ Synthesize a grounded response with inline [DOC-ID] citations:</textarea>
             const lora = data.lora_lab;
             const attn = data.attention_lab;
             document.getElementById('fp-output').innerHTML = `
-                <div class="grid grid-cols-3 gap-2">
-                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">BPE Compression</div>
-                        <div class="text-base font-bold text-indigo-400">${bpe.raw_utf8_byte_length}B → ${bpe.bpe_token_length} IDs (${bpe.compression_ratio_pct}%)</div>
-                        <div class="text-[11px] text-emerald-400">Roundtrip Lossless: ${bpe.lossless_roundtrip_verified}</div>
-                    </div>
-                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">LoRA Param Savings</div>
-                        <div class="text-base font-bold text-cyan-400">${lora.parameter_reduction_pct}% Saved</div>
-                        <div class="text-[11px] text-emerald-400">Step-0 ΔW=0: ${lora.zero_init_identity_verified}</div>
-                    </div>
-                    <div class="p-3 rounded-xl bg-slate-900 border border-slate-800">
-                        <div class="text-slate-400">Causal Mask Leakage</div>
-                        <div class="text-base font-bold text-emerald-400">${attn.causal_upper_triangle_max_leakage}</div>
-                        <div class="text-[11px] text-emerald-400">Upper-Tri Zero: ${attn.causal_mask_verified}</div>
-                    </div>
-                </div>
-                <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 mono text-[11px] text-slate-300">
-                    Top Learned BPE Merges: ${bpe.top_merges.slice(0, 6).map(m => `${m.pair}→#${m.new_token_id}(${m.subword_str})`).join(', ')}
-                </div>
+                <table class="eui-table" style="margin-bottom:8px;">
+                    <tr><th>BPE Byte Compression</th><td class="mono">${bpe.raw_utf8_byte_length} bytes -> ${bpe.bpe_token_length} tokens (${bpe.compression_ratio_pct}% cut, lossless=${bpe.lossless_roundtrip_verified})</td></tr>
+                    <tr><th>LoRA Parameter Savings</th><td class="mono">${lora.trainable_lora_params} trainable vs ${lora.frozen_pretrained_params} frozen (${lora.parameter_reduction_pct}% saved)</td></tr>
+                    <tr><th>LoRA Step-0 Delta W</th><td class="mono">${lora.step_0_max_deviation} (Zero-init verified=${lora.zero_init_identity_verified})</td></tr>
+                    <tr><th>Causal Mask Upper-Tri Max</th><td class="mono">${attn.causal_upper_triangle_max_leakage} (Verified=${attn.causal_mask_verified})</td></tr>
+                </table>
+                <pre class="log-box">Learned BPE Merges: ${bpe.top_merges.slice(0, 6).map(m => `${m.pair}->#${m.new_token_id}(${m.subword_str})`).join(', ')}</pre>
             `;
+        }
+
+        async function callApi(method, url) {
+            const box = document.getElementById('api-out-box');
+            box.textContent = method + ' ' + url + ' ...';
+            const r = await fetch(url, { method: method, headers: {'Accept': 'application/json'} });
+            const j = await r.json();
+            box.textContent = 'HTTP ' + r.status + '\n\n' + JSON.stringify(j, null, 2);
+        }
+        async function callSumApi() {
+            const box = document.getElementById('api-out-box');
+            box.textContent = 'POST /summarize ...';
+            const r = await fetch('/summarize', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ dialogue: document.getElementById('sum-dialogue').value, max_new_tokens: 64, persona: 'sre_deep_dive' })
+            });
+            const j = await r.json();
+            box.textContent = 'HTTP ' + r.status + '\n\n' + JSON.stringify(j, null, 2);
+        }
+        async function callRagApi() {
+            const box = document.getElementById('api-out-box');
+            box.textContent = 'POST /rag-qa ...';
+            const r = await fetch('/rag-qa', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ query: document.getElementById('rag-query').value, top_k: 3 })
+            });
+            const j = await r.json();
+            box.textContent = 'HTTP ' + r.status + '\n\n' + JSON.stringify(j, null, 2);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
