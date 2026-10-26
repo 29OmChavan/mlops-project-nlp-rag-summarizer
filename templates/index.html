@@ -3,49 +3,40 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>PEFT LoRA Summarizer &amp; Hybrid RAG Suite (Ops Console)</title>
+    <title>PEFT LoRA Summarizer &amp; Hybrid RAG Suite (Step-by-Step Ops Modal)</title>
     <style>
-        /* Pre-2022 Kibana 6 / Elastic EUI Utilitarian Ops Console (2019 Light/Charcoal Split) */
+        /* Clean Step-by-Step Modal Wizard Layout (Project 03 - Kibana Ops Teal/Slate Theme) */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            font-family: "BlinkMacSystemFont", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f5f7fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #e4e9f0;
             color: #1a1c21;
-            font-size: 13.5px;
-            line-height: 1.48;
+            font-size: 14px;
+            line-height: 1.55;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         code, pre, .mono {
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            font-size: 12px;
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 12.5px;
         }
-        /* Kibana-style Charcoal Top Bar */
         .kbn-topbar {
             background-color: #1d1e24;
             color: #dfe5ef;
-            padding: 8px 18px;
-            border-bottom: 2px solid #00bfb3;
+            padding: 10px 20px;
+            border-bottom: 3px solid #00bfb3;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
         }
-        .kbn-brand {
-            font-weight: 700;
-            font-size: 14.5px;
-            color: #ffffff;
-        }
-        .kbn-sub {
-            color: #98a2b3;
-            font-size: 12px;
-            margin-left: 8px;
-        }
-        /* Utilitarian Flat Toolbar Navigation */
+        .kbn-brand { font-weight: 700; font-size: 15px; color: #ffffff; }
         .kbn-nav {
             background-color: #ffffff;
             border-bottom: 1px solid #d3dae6;
-            padding: 0 18px;
+            padding: 0 16px;
             display: flex;
+            justify-content: center;
             flex-wrap: wrap;
             gap: 2px;
         }
@@ -53,681 +44,464 @@
             background: none;
             border: none;
             border-bottom: 3px solid transparent;
-            padding: 9px 13px;
+            padding: 10px 13px;
             font-size: 12.5px;
             font-weight: 600;
             color: #343741;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
         }
-        .kbn-tab:hover {
-            background-color: #f5f7fa;
-            color: #006bb4;
+        .kbn-tab:hover { background-color: #f5f7fa; color: #006bb4; }
+        .kbn-tab.active { color: #006bb4; border-bottom-color: #006bb4; background-color: #f0f7fc; }
+
+        /* Centered Modal Container */
+        .modal-stage {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 28px 16px 48px;
         }
-        .kbn-tab.active {
-            color: #006bb4;
-            border-bottom-color: #006bb4;
-            background-color: #f0f7fc;
-        }
-        /* Main Workspace */
-        .workspace {
-            max-width: 1280px;
-            margin: 14px auto;
-            padding: 0 16px 40px;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-            align-items: start;
-        }
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-        @media (max-width: 960px) {
-            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-        }
-        /* EUI Flat Panel */
-        .eui-panel {
+        .modal-card {
+            width: 100%;
+            max-width: 720px;
             background-color: #ffffff;
-            border: 1px solid #d3dae6;
-            border-radius: 2px;
-            margin-bottom: 14px;
+            border: 1px solid #c9d3e0;
+            border-radius: 4px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
         }
-        .eui-head {
+        .modal-header {
             background-color: #fafbfd;
             border-bottom: 1px solid #d3dae6;
-            padding: 8px 12px;
-            font-weight: 700;
-            font-size: 13px;
-            color: #1a1c21;
+            padding: 14px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 6px;
         }
-        .eui-body {
-            padding: 12px;
+        .modal-title { font-size: 15.5px; font-weight: 700; color: #1a1c21; }
+        .step-bar {
+            display: flex;
+            background-color: #f5f7fa;
+            border-bottom: 1px solid #d3dae6;
         }
-        label {
-            display: block;
+        .step-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px 6px;
             font-size: 12px;
             font-weight: 600;
-            color: #343741;
-            margin-bottom: 4px;
+            color: #555;
+            background: none;
+            border: none;
+            border-right: 1px solid #d3dae6;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
         }
-        input[type="text"], input[type="number"], select, textarea {
-            width: 100%;
-            padding: 6px 8px;
-            font-size: 12.5px;
-            border: 1px solid #c9d3e0;
-            border-radius: 2px;
-            background-color: #fbfcfe;
-            color: #1a1c21;
-            margin-bottom: 8px;
-            font-family: inherit;
-        }
-        input:focus, select:focus, textarea:focus {
-            border-color: #006bb4;
-            outline: none;
+        .step-btn:last-child { border-right: none; }
+        .step-btn.active {
             background-color: #ffffff;
-        }
-        .btn-blue {
-            background-color: #006bb4;
-            color: #ffffff;
-            border: 1px solid #00558f;
-            padding: 6px 12px;
-            font-size: 12.5px;
-            font-weight: 600;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-        .btn-blue:hover { background-color: #00558f; }
-        .btn-teal {
-            background-color: #0079a5;
-            color: #ffffff;
-            border: 1px solid #005f82;
-            padding: 6px 12px;
-            font-size: 12.5px;
-            font-weight: 600;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-        .btn-outline {
-            background-color: #f5f7fa;
-            color: #343741;
-            border: 1px solid #c9d3e0;
-            padding: 4px 9px;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 2px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .btn-outline:hover { background-color: #e4e9f0; }
-        .btn-outline.active-persona {
-            background-color: #006bb4;
-            color: #ffffff;
-            border-color: #00558f;
-        }
-        .badge {
-            display: inline-block;
-            padding: 2px 6px;
-            font-size: 11px;
+            color: #006bb4;
+            border-bottom-color: #006bb4;
             font-weight: 700;
-            border-radius: 2px;
-            border: 1px solid transparent;
         }
-        .badge-ok { background-color: #e6f9f7; color: #006d64; border-color: #99e5dd; }
-        .badge-warn { background-color: #fff6e5; color: #8a5300; border-color: #ffd685; }
-        .badge-err { background-color: #fce8e6; color: #a51d24; border-color: #f5b2ad; }
-        .badge-info { background-color: #e6f2fa; color: #00558f; border-color: #99cbe9; }
-
-        table.eui-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 12.5px;
-        }
-        table.eui-table th, table.eui-table td {
-            border: 1px solid #d3dae6;
-            padding: 6px 8px;
-            text-align: left;
-        }
-        table.eui-table th {
-            background-color: #f5f7fa;
-            font-weight: 700;
-            color: #343741;
-        }
-        table.eui-table tr:nth-child(even) { background-color: #fafbfd; }
-
-        pre.log-box {
-            background-color: #1d1e24;
-            color: #dfe5ef;
-            border: 1px solid #343741;
-            padding: 10px;
-            border-radius: 2px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-        }
-        .callout {
-            background-color: #e6f2fa;
-            border-left: 4px solid #006bb4;
-            padding: 8px 12px;
-            margin-bottom: 12px;
-            font-size: 12.5px;
+        .modal-body { padding: 22px; }
+        .modal-footer {
+            background-color: #fafbfd;
+            border-top: 1px solid #d3dae6;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .hidden { display: none; }
+        .step-pane { display: none; }
+        .step-pane.active { display: block; }
+
+        label { display: block; font-size: 12.5px; font-weight: 600; color: #343741; margin-bottom: 5px; }
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 8px 10px;
+            font-size: 13.5px;
+            border: 1px solid #c9d3e0;
+            border-radius: 3px;
+            background-color: #fbfcfe;
+            color: #1a1c21;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 3px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-blue { background-color: #006bb4; color: #ffffff; }
+        .btn-teal { background-color: #0079a5; color: #ffffff; }
+        .btn-outline { background-color: #ffffff; color: #343741; border-color: #c9d3e0; }
+        .btn-outline.active-persona { background-color: #006bb4; color: #ffffff; border-color: #00558f; }
+
+        table.eui-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 8px; }
+        table.eui-table th, table.eui-table td { border: 1px solid #d3dae6; padding: 7px 10px; text-align: left; }
+        table.eui-table th { background-color: #f5f7fa; font-weight: 700; }
+        pre.log-box { background-color: #1d1e24; color: #dfe5ef; padding: 10px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; margin-top: 8px; }
     </style>
 </head>
 <body>
-    <!-- Top Bar -->
     <header class="kbn-topbar">
-        <div>
-            <span class="kbn-brand">PEFT LoRA Summarizer &amp; Hybrid RAG Suite</span>
-            <span class="kbn-sub">Flan-T5 LoRA Adapter / Qdrant + BM25 RRF / First-Principles BPE &amp; LoRA Check</span>
-        </div>
-        <div class="mono" style="font-size:11.5px;">
-            Status: <strong>{{ health_data.get('status', 'healthy') | upper }}</strong> |
-            LoRA Adapter: <strong>{{ 'Loaded' if health_data.get('lora_adapter_ready') else 'Base' }}</strong> |
-            ROUGE Gate: <strong>{{ 'PASS' if eval_data.get('ci_cd_evaluation_gate_passed', True) else 'CHECK' }}</strong>
-        </div>
+        <span class="kbn-brand">PEFT LoRA Summarizer &amp; Hybrid RAG Suite</span>
+        <span class="mono" style="font-size:12px;">Status: {{ health_data.get('status', 'healthy') | upper }}</span>
     </header>
 
-    <!-- Flat Toolbar Navigation -->
     <nav class="kbn-nav">
-        <button type="button" onclick="switchTab('studio')" id="tab-studio" class="kbn-tab">1. Log Summarizer &amp; Search Duel</button>
-        <button type="button" onclick="switchTab('chunks')" id="tab-chunks" class="kbn-tab">2. Runbook Chunks &amp; 2D SVD Plot</button>
-        <button type="button" onclick="switchTab('playground')" id="tab-playground" class="kbn-tab">3. Prompt &amp; BPE / LoRA Check</button>
-        <button type="button" onclick="switchTab('evaluation')" id="tab-evaluation" class="kbn-tab">4. ROUGE/BLEU &amp; RRF Scores</button>
-        <button type="button" onclick="switchTab('health')" id="tab-health" class="kbn-tab">5. Status &amp; Grounding Log</button>
-        <button type="button" onclick="switchTab('intro')" id="tab-intro" class="kbn-tab">6. Dev Notes</button>
-        <button type="button" onclick="switchTab('help')" id="tab-help" class="kbn-tab">7. Help &amp; Operator Guide</button>
-        <button type="button" onclick="switchTab('docs')" id="tab-docs" class="kbn-tab">8. REST API Tester (/docs)</button>
+        <button type="button" onclick="switchSection('studio')" id="sec-btn-studio" class="kbn-tab">1. Summarizer &amp; Search</button>
+        <button type="button" onclick="switchSection('chunks')" id="sec-btn-chunks" class="kbn-tab">2. Runbook Chunks</button>
+        <button type="button" onclick="switchSection('playground')" id="sec-btn-playground" class="kbn-tab">3. Prompt &amp; BPE/LoRA</button>
+        <button type="button" onclick="switchSection('evaluation')" id="sec-btn-evaluation" class="kbn-tab">4. ROUGE &amp; RRF</button>
+        <button type="button" onclick="switchSection('health')" id="sec-btn-health" class="kbn-tab">5. Grounding Log</button>
+        <button type="button" onclick="switchSection('intro')" id="sec-btn-intro" class="kbn-tab">6. Dev Notes</button>
+        <button type="button" onclick="switchSection('help')" id="sec-btn-help" class="kbn-tab">7. Help Guide</button>
+        <button type="button" onclick="switchSection('docs')" id="sec-btn-docs" class="kbn-tab">8. API Tester (/docs)</button>
     </nav>
 
-    <main class="workspace">
+    <div class="modal-stage">
+        <div class="modal-card">
 
-        <!-- ===================================================================== -->
-        <!-- TAB 1: LOG SUMMARIZER & SEARCH DUEL (/studio)                         -->
-        <!-- ===================================================================== -->
-        <section id="view-studio" class="tab-view hidden">
-            <div class="callout">
-                <strong>Quick Load:</strong> Click an incident preset to populate both the dialogue box and the runbook search box:
-                <button type="button" onclick="loadPreset('sre_outage')" class="btn-outline" style="margin-left:6px;">Preset 1: AWS EC2 Unpickle 500</button>
-                <button type="button" onclick="loadPreset('drift_incident')" class="btn-outline">Preset 2: KS Covariate Drift Alert</button>
-                <button type="button" onclick="loadPreset('rag_hallucination')" class="btn-outline">Preset 3: Hybrid RRF Upgrade</button>
-                <span style="float:right;">Need help? See <a href="javascript:void(0)" onclick="switchTab('help')" style="color:#006bb4;font-weight:700;">Tab 7: Help &amp; Operator Guide</a>.</span>
-            </div>
-
-            <div class="grid-2">
-                <!-- Left Panel: PEFT LoRA Dialogue Summarizer -->
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>Part A: Incident Log Summarizer (`google/flan-t5-small` + LoRA)</span>
-                        <span class="badge badge-ok">Adapter Active</span>
-                    </div>
-                    <div class="eui-body">
-                        <label>Summary Format Style:</label>
-                        <div style="display:flex; gap:6px; margin-bottom:10px;">
-                            <button type="button" onclick="setPersona('executive_brief')" data-persona="executive_brief" class="persona-btn btn-outline active-persona">Executive Brief</button>
-                            <button type="button" onclick="setPersona('sre_deep_dive')" data-persona="sre_deep_dive" class="persona-btn btn-outline">SRE Post-Mortem</button>
-                            <button type="button" onclick="setPersona('compliance_sla_audit')" data-persona="compliance_sla_audit" class="persona-btn btn-outline">SLA Audit Note</button>
-                        </div>
-
-                        <label>Incident Chat / Ticket Transcript:</label>
-                        <textarea id="sum-dialogue" rows="5">SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during peak traffic. ML Engineer: Joblib failed to unpickle RiskDomainFeatureGenerator from __main__ inside uvicorn workers. DevOps: We moved the transformer into the installable src package with pip install -e ., rebuilt the Docker image, verified /health passes, and restored 99.98% SLA availability.</textarea>
-
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                            <div>
-                                <span style="font-size:12px; font-weight:600;">Max Output Tokens:</span>
-                                <input id="sum-tokens" type="number" value="80" min="20" max="180" style="width:75px; display:inline-block; margin-bottom:0;" />
-                            </div>
-                            <button type="button" onclick="runSummarizer()" id="btn-summarize" class="btn-blue">Run LoRA Summarizer</button>
-                        </div>
-
-                        <div style="border:1px solid #d3dae6; background:#fafbfd; padding:10px; margin-bottom:10px;">
-                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <strong id="sum-persona-badge" style="color:#006bb4;">Executive Brief</strong>
-                                <span id="sum-faithfulness" class="badge badge-ok mono">Grounding: --</span>
-                            </div>
-                            <div id="sum-styled-text" style="font-size:13px;">Click "Run LoRA Summarizer" to condense the transcript.</div>
-                        </div>
-
-                        <div class="grid-4">
-                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
-                                <div style="font-size:11px; color:#555;">Word Cut</div>
-                                <div id="comp-ratio" class="mono" style="font-weight:700;">--%</div>
-                            </div>
-                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
-                                <div style="font-size:11px; color:#555;">Words</div>
-                                <div id="comp-words" class="mono" style="font-weight:700;">--</div>
-                            </div>
-                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
-                                <div style="font-size:11px; color:#555;">Time Saved</div>
-                                <div id="comp-time" class="mono" style="font-weight:700;">--s</div>
-                            </div>
-                            <div style="border:1px solid #d3dae6; padding:6px; text-align:center;">
-                                <div style="font-size:11px; color:#555;">Grade Level</div>
-                                <div id="comp-grade" class="mono" style="font-weight:700;">--</div>
-                            </div>
-                        </div>
-
-                        <div style="margin-bottom:8px;">
-                            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Extracted Stack Terms &amp; Actions:</div>
-                            <div id="sum-entities" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px;"></div>
-                            <div id="sum-actions" style="font-size:12px; color:#343741;"></div>
-                        </div>
-
-                        <div>
-                            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Sentence Grounding Check:</div>
-                            <div id="sum-claims"></div>
-                        </div>
-                    </div>
+            <!-- ===================================================================== -->
+            <!-- SECTION 1: SUMMARIZER & SEARCH WIZARD (/studio)                       -->
+            <!-- ===================================================================== -->
+            <section id="sec-studio" class="sec-view hidden">
+                <div class="modal-header">
+                    <span class="modal-title">Incident Summarizer &amp; Hybrid RAG Wizard</span>
+                    <span class="mono" id="lbl-studio">Step 1 of 4</span>
                 </div>
-
-                <!-- Right Panel: Hybrid RAG & 3-Way Retrieval Comparison -->
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>Part B: Runbook Search (Naive Dense vs. BM25 vs. Hybrid RRF)</span>
-                        <span class="badge badge-info">RRF k=60</span>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('studio', 1)" id="st-studio-1">1. Incident Log Input</button>
+                    <button type="button" class="step-btn" onclick="setStep('studio', 2)" id="st-studio-2">2. LoRA Summary Output</button>
+                    <button type="button" class="step-btn" onclick="setStep('studio', 3)" id="st-studio-3">3. Runbook Question</button>
+                    <button type="button" class="step-btn" onclick="setStep('studio', 4)" id="st-studio-4">4. 3-Way Search Result</button>
+                </div>
+                <div class="modal-body">
+                    <!-- Step 1 -->
+                    <div class="step-pane active" id="pn-studio-1">
+                        <p style="margin-bottom:10px;"><strong>Step 1:</strong> Load a sample outage transcript or paste your own, choose a summary style, and click <strong>Summarize &amp; Next</strong>.</p>
+                        <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-outline" onclick="loadPreset('sre_outage')">Preset 1: EC2 Unpickle 500</button>
+                            <button type="button" class="btn btn-outline" onclick="loadPreset('drift_incident')">Preset 2: KS Drift Alert</button>
+                            <button type="button" class="btn btn-outline" onclick="loadPreset('rag_hallucination')">Preset 3: Hybrid RRF</button>
+                        </div>
+                        <label>Target Summary Style:</label>
+                        <div style="display:flex; gap:6px; margin-bottom:10px;">
+                            <button type="button" onclick="setPersona('executive_brief')" data-persona="executive_brief" class="persona-btn btn btn-outline active-persona">Executive Brief</button>
+                            <button type="button" onclick="setPersona('sre_deep_dive')" data-persona="sre_deep_dive" class="persona-btn btn btn-outline">SRE Post-Mortem</button>
+                            <button type="button" onclick="setPersona('compliance_sla_audit')" data-persona="compliance_sla_audit" class="persona-btn btn btn-outline">SLA Audit</button>
+                        </div>
+                        <label>Incident Transcript:</label>
+                        <textarea id="sum-dialogue" rows="4">SRE Lead: Our FastAPI risk prediction container on AWS EC2 returned HTTP 500 during peak traffic. ML Engineer: Joblib failed to unpickle RiskDomainFeatureGenerator from __main__ inside uvicorn workers. DevOps: We moved the transformer into the installable src package with pip install -e ., rebuilt the Docker image, verified /health passes, and restored 99.98% SLA availability.</textarea>
+                        <input id="sum-tokens" type="hidden" value="80" />
+                        <button type="button" class="btn btn-blue" id="btn-summarize" onclick="runSummarizer()">Summarize &amp; Move to Step 2 &rarr;</button>
                     </div>
-                    <div class="eui-body">
+
+                    <!-- Step 2 -->
+                    <div class="step-pane" id="pn-studio-2">
+                        <p style="margin-bottom:8px;"><strong id="sum-persona-badge">Executive Summary</strong> (<span id="sum-faithfulness" class="mono">Grounding: --</span>)</p>
+                        <div id="sum-styled-text" style="border:1px solid #d3dae6; background:#fafbfd; padding:12px; margin-bottom:12px;">--</div>
+                        <table class="eui-table">
+                            <tr><th>Word Compression</th><td id="comp-ratio" class="mono">--</td><th>Words (Src-&gt;Sum)</th><td id="comp-words" class="mono">--</td></tr>
+                            <tr><th>Reading Time Saved</th><td id="comp-time" class="mono">--</td><th>Grade Level</th><td id="comp-grade" class="mono">--</td></tr>
+                        </table>
+                        <div id="sum-claims" style="margin-top:10px;"></div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="step-pane" id="pn-studio-3">
+                        <p style="margin-bottom:10px;"><strong>Step 3:</strong> Enter a technical runbook question to compare Naive Dense, Pure BM25, and Hybrid RRF search.</p>
                         <label>Technical Question:</label>
                         <input id="rag-query" type="text" value="How does LoRA parameterize weight updates and why is matrix B initialized to zero?" />
+                        <label>Optional Category Filter:</label>
+                        <select id="rag-category">
+                            <option value="">All Categories</option>
+                            <option value="llm_finetuning">llm_finetuning</option>
+                            <option value="rag_optimization">rag_optimization</option>
+                            <option value="data_drift">data_drift</option>
+                        </select>
+                        <button type="button" class="btn btn-teal" id="btn-rag" onclick="runRagDuel()">Run 3-Way Search &amp; Move to Step 4 &rarr;</button>
+                    </div>
 
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
-                            <div style="flex:1;">
-                                <label>Optional Category Filter:</label>
-                                <select id="rag-category" style="margin-bottom:0;">
-                                    <option value="">All Categories</option>
-                                    <option value="llm_finetuning">llm_finetuning</option>
-                                    <option value="rag_optimization">rag_optimization</option>
-                                    <option value="data_drift">data_drift</option>
-                                    <option value="mlops_architecture">mlops_architecture</option>
-                                    <option value="transformer_math">transformer_math</option>
-                                </select>
-                            </div>
-                            <div style="padding-top:16px;">
-                                <button type="button" onclick="runRagDuel()" id="btn-rag" class="btn-teal">Search &amp; Compare 3 Modes</button>
-                            </div>
-                        </div>
-
-                        <div style="font-size:11.5px; color:#555; margin-bottom:8px;">
-                            Query Expansion: <span id="rag-expanded" class="mono" style="color:#006bb4;">--</span>
-                        </div>
-
-                        <div style="border:1px solid #d3dae6; background:#fafbfd; padding:10px; margin-bottom:10px;">
-                            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
-                                <strong>Cited Runbook Answer</strong>
-                                <span id="rag-faithfulness" class="badge badge-ok mono">Grounding: --</span>
-                            </div>
-                            <div id="rag-answer" style="font-size:13px; margin-bottom:6px;">--</div>
-                            <div id="rag-citations" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
-                        </div>
-
-                        <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Side-by-Side Retriever Comparison (Top 3 Hits):</div>
-                        <div class="grid-3" style="margin-bottom:10px; font-size:12px;">
-                            <div style="border:1px solid #d3dae6; padding:6px;">
-                                <div style="font-weight:700; border-bottom:1px solid #eee; padding-bottom:3px; margin-bottom:4px;">1. Naive Dense</div>
-                                <div id="duel-naive" class="mono"></div>
-                            </div>
-                            <div style="border:1px solid #d3dae6; padding:6px;">
-                                <div style="font-weight:700; border-bottom:1px solid #eee; padding-bottom:3px; margin-bottom:4px;">2. Pure BM25</div>
-                                <div id="duel-bm25" class="mono"></div>
-                            </div>
-                            <div style="border:1px solid #0079a5; background:#f0f7fc; padding:6px;">
-                                <div style="font-weight:700; color:#00558f; border-bottom:1px solid #cce3f5; padding-bottom:3px; margin-bottom:4px;">3. Hybrid RRF</div>
-                                <div id="duel-hybrid" class="mono"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">Answer Claim Verification:</div>
-                            <div id="rag-claims"></div>
+                    <!-- Step 4 -->
+                    <div class="step-pane" id="pn-studio-4">
+                        <p style="margin-bottom:6px;"><strong>Cited Answer</strong> (<span id="rag-faithfulness" class="mono">Grounding: --</span>)</p>
+                        <div id="rag-answer" style="border:1px solid #d3dae6; background:#fafbfd; padding:12px; margin-bottom:10px;">--</div>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px; font-size:12px;">
+                            <div style="border:1px solid #d3dae6; padding:8px;"><strong>1. Naive Dense</strong><div id="duel-naive" class="mono" style="margin-top:4px;"></div></div>
+                            <div style="border:1px solid #d3dae6; padding:8px;"><strong>2. Pure BM25</strong><div id="duel-bm25" class="mono" style="margin-top:4px;"></div></div>
+                            <div style="border:1px solid #0079a5; background:#f0f7fc; padding:8px;"><strong>3. Hybrid RRF</strong><div id="duel-hybrid" class="mono" style="margin-top:4px;"></div></div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- ===================================================================== -->
-        <!-- TAB 2: RUNBOOK CHUNKS & 2D SVD PLOT (/chunk-visualizer)               -->
-        <!-- ===================================================================== -->
-        <section id="view-chunks" class="tab-view hidden">
-            <div class="grid-2">
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>Indexed Runbook Chunks &amp; 2D SVD Coordinates</span>
-                        <button type="button" onclick="loadChunks()" class="btn-outline">Refresh Plot</button>
-                    </div>
-                    <div class="eui-body">
-                        <canvas id="vector-canvas" width="580" height="240" style="width:100%; border:1px solid #d3dae6; background:#ffffff; margin-bottom:10px;"></canvas>
-                        <div id="chunk-list" style="max-height:320px; overflow-y:auto;"></div>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('studio', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('studio', 1)">Next Step &rarr;</button>
                 </div>
+            </section>
 
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>Add Custom Runbook Chunk to Qdrant + BM25</span>
-                        <span class="badge badge-ok">In-Memory Reindex</span>
-                    </div>
-                    <div class="eui-body">
-                        <p style="font-size:12.5px; margin-bottom:10px;">
-                            Adding a paragraph here assigns the next `[DOC-xxx]` tag, refits the TF-IDF/SVD vector projection, upserts points into Qdrant, and updates the BM25 token index.
-                        </p>
+            <!-- ===================================================================== -->
+            <!-- SECTION 2: RUNBOOK CHUNKS WIZARD (/chunk-visualizer)                  -->
+            <!-- ===================================================================== -->
+            <section id="sec-chunks" class="sec-view hidden">
+                <div class="modal-header">
+                    <span class="modal-title">Runbook Chunks &amp; Live Ingestion Wizard</span>
+                    <span class="mono" id="lbl-chunks">Step 1 of 3</span>
+                </div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('chunks', 1)" id="st-chunks-1">1. Add New Chunk</button>
+                    <button type="button" class="step-btn" onclick="setStep('chunks', 2)" id="st-chunks-2">2. 2D SVD Vector Plot</button>
+                    <button type="button" class="step-btn" onclick="setStep('chunks', 3)" id="st-chunks-3">3. Indexed Chunk List</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-chunks-1">
+                        <p style="margin-bottom:10px;"><strong>Step 1:</strong> Add a custom runbook paragraph into Qdrant and BM25.</p>
                         <label>Chunk Title:</label>
                         <input id="ing-title" type="text" value="FlashAttention-2 GPU SRAM Tiling" />
                         <label>Category Tag:</label>
                         <input id="ing-category" type="text" value="transformer_math" />
-                        <label>Source Reference:</label>
-                        <input id="ing-source" type="text" value="GPU Systems Notes" />
-                        <label>Runbook Paragraph:</label>
-                        <textarea id="ing-text" rows="4">FlashAttention-2 tiles Q, K, and V blocks into on-chip GPU SRAM so the quadratic N x N attention matrix is never written out to slow HBM memory.</textarea>
-                        <button type="button" onclick="ingestCustomChunk()" class="btn-blue">Index Chunk Now</button>
-                        <div id="ing-status" class="mono" style="margin-top:8px; color:#006d64; font-weight:700;"></div>
+                        <input id="ing-source" type="hidden" value="GPU Systems Notes" />
+                        <label>Paragraph Text:</label>
+                        <textarea id="ing-text" rows="3">FlashAttention-2 tiles Q, K, and V blocks into on-chip GPU SRAM so the quadratic N x N attention matrix is never written to HBM.</textarea>
+                        <button type="button" class="btn btn-blue" onclick="ingestCustomChunk()">Index Chunk &amp; View Plot &rarr;</button>
+                        <div id="ing-status" class="mono" style="margin-top:8px; color:#006d64;"></div>
+                    </div>
+                    <div class="step-pane" id="pn-chunks-2">
+                        <p style="margin-bottom:8px;"><strong>Step 2:</strong> 2D SVD vector projection of all indexed `[DOC-ID]` chunks.</p>
+                        <canvas id="vector-canvas" width="640" height="240" style="width:100%; border:1px solid #d3dae6; background:#fff;"></canvas>
+                    </div>
+                    <div class="step-pane" id="pn-chunks-3">
+                        <div id="chunk-list" style="max-height:300px; overflow-y:auto;"></div>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('chunks', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('chunks', 1)">Next Step &rarr;</button>
+                </div>
+            </section>
 
-        <!-- ===================================================================== -->
-        <!-- TAB 3: PROMPT & BPE / LORA CHECK (/prompt-playground)                 -->
-        <!-- ===================================================================== -->
-        <section id="view-playground" class="tab-view hidden">
-            <div class="grid-2">
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>Prompt Template Tester (`{context}`, `{query}`, `{persona}`)</span>
-                    </div>
-                    <div class="eui-body">
+            <!-- ===================================================================== -->
+            <!-- SECTION 3: PROMPT & BPE/LORA WIZARD (/prompt-playground)              -->
+            <!-- ===================================================================== -->
+            <section id="sec-playground" class="sec-view hidden">
+                <div class="modal-header">
+                    <span class="modal-title">Prompt Sandbox &amp; First-Principles BPE/LoRA Wizard</span>
+                    <span class="mono" id="lbl-playground">Step 1 of 2</span>
+                </div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('playground', 1)" id="st-playground-1">1. Custom Prompt Template</button>
+                    <button type="button" class="step-btn" onclick="setStep('playground', 2)" id="st-playground-2">2. BPE Merges &amp; LoRA Check</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-playground-1">
                         <label>Question:</label>
                         <input id="pg-query" type="text" value="How does Reciprocal Rank Fusion combine Qdrant dense search and BM25?" />
-                        <label>Prompt Template:</label>
-                        <textarea id="pg-template" rows="5" class="mono">Role: {persona}
-Context Chunks:
+                        <label>Template (`{context}`, `{query}`, `{persona}`):</label>
+                        <textarea id="pg-template" rows="4" class="mono">Role: {persona}
+Context:
 {context}
-
-Question: {query}
-Answer with [DOC-ID] tags:</textarea>
-                        <button type="button" onclick="runPromptPlayground()" class="btn-blue">Render Prompt &amp; Score Grounding</button>
+Q: {query}</textarea>
+                        <button type="button" class="btn btn-blue" onclick="runPromptPlayground()">Render Prompt</button>
                         <div id="pg-output" style="margin-top:10px;"></div>
                     </div>
-                </div>
-
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>First-Principles BPE Tokenizer, Causal Mask &amp; LoRA Check</span>
-                    </div>
-                    <div class="eui-body">
-                        <label>Sample String for UTF-8 Byte-Pair Merging (`BytePairTokenizerFromScratch`):</label>
+                    <div class="step-pane" id="pn-playground-2">
+                        <label>UTF-8 Sample String for BPE Merging:</label>
                         <input id="fp-text" type="text" value="mlops pipeline dvc mlops pipeline dvc lora rag attention" />
-                        <div class="grid-3">
-                            <div><label>Target Vocab Size:</label><input id="fp-vocab" type="number" value="268" min="257" max="310" /></div>
-                            <div><label>LoRA Rank (`r`):</label><input id="fp-r" type="number" value="8" min="1" max="64" /></div>
-                            <div><label>LoRA Alpha:</label><input id="fp-alpha" type="number" value="16" min="1" max="128" /></div>
+                        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+                            <div><label>Vocab Size:</label><input id="fp-vocab" type="number" value="268" /></div>
+                            <div><label>LoRA Rank r:</label><input id="fp-r" type="number" value="8" /></div>
+                            <div><label>LoRA Alpha:</label><input id="fp-alpha" type="number" value="16" /></div>
                         </div>
-                        <button type="button" onclick="runFirstPrinciplesLab()" class="btn-teal">Run BPE Merges &amp; LoRA Step-0 Check</button>
+                        <button type="button" class="btn btn-teal" onclick="runFirstPrinciplesLab()">Run BPE &amp; LoRA Verification</button>
                         <div id="fp-output" style="margin-top:10px;"></div>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('playground', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('playground', 1)">Next Step &rarr;</button>
+                </div>
+            </section>
 
-        <!-- ===================================================================== -->
-        <!-- TAB 4: ROUGE/BLEU & RRF SCORES (/evaluation-hub)                      -->
-        <!-- ===================================================================== -->
-        <section id="view-evaluation" class="tab-view hidden">
-            <div class="grid-2">
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>LoRA Summarizer Validation Metrics (`evaluation_report.json`)</span>
-                        <span class="badge badge-ok">Gate Passed: {{ eval_data.get('ci_cd_evaluation_gate_passed', True) }}</span>
-                    </div>
-                    <div class="eui-body">
+            <!-- ===================================================================== -->
+            <!-- SECTION 4: ROUGE/BLEU & RRF WIZARD (/evaluation-hub)                  -->
+            <!-- ===================================================================== -->
+            <section id="sec-evaluation" class="sec-view hidden">
+                <div class="modal-header">
+                    <span class="modal-title">ROUGE/BLEU &amp; Hybrid RRF Benchmarks</span>
+                    <span class="mono" id="lbl-evaluation">Step 1 of 2</span>
+                </div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('evaluation', 1)" id="st-evaluation-1">1. LoRA ROUGE/BLEU Gate</button>
+                    <button type="button" class="step-btn" onclick="setStep('evaluation', 2)" id="st-evaluation-2">2. Naive vs. Hybrid RRF</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-evaluation-1">
                         <table class="eui-table">
-                            <tr><th>ROUGE-1 F1</th><td class="mono"><strong>{{ eval_data.get('metrics', {}).get('rouge1', 0.5621) }}</strong> (Gate &gt;= 0.32)</td></tr>
-                            <tr><th>ROUGE-2 F1</th><td class="mono">{{ eval_data.get('metrics', {}).get('rouge2', 0.3412) }}</td></tr>
-                            <tr><th>ROUGE-L F1</th><td class="mono"><strong>{{ eval_data.get('metrics', {}).get('rougeL', 0.4985) }}</strong> (Gate &gt;= 0.28)</td></tr>
-                            <tr><th>BLEU Score</th><td class="mono">{{ eval_data.get('metrics', {}).get('bleu', 0.2845) }}</td></tr>
+                            <tr><th>CI/CD Gate Passed</th><td class="mono"><strong>{{ eval_data.get('ci_cd_evaluation_gate_passed', True) }}</strong></td></tr>
+                            <tr><th>ROUGE-1 / ROUGE-2</th><td class="mono">{{ eval_data.get('metrics', {}).get('rouge1', 0.5621) }} / {{ eval_data.get('metrics', {}).get('rouge2', 0.3412) }}</td></tr>
+                            <tr><th>ROUGE-L / BLEU</th><td class="mono">{{ eval_data.get('metrics', {}).get('rougeL', 0.4985) }} / {{ eval_data.get('metrics', {}).get('bleu', 0.2845) }}</td></tr>
                         </table>
                     </div>
-                </div>
-
-                <div class="eui-panel">
-                    <div class="eui-head">
-                        <span>Retrieval Benchmark (`rag_benchmark_report.json`)</span>
-                        <span class="badge badge-info">MRR Gain: +{{ rag_data.get('mrr_improvement', 0.1667) }}</span>
-                    </div>
-                    <div class="eui-body">
+                    <div class="step-pane" id="pn-evaluation-2">
                         <table class="eui-table">
-                            <thead>
-                                <tr><th>Metric</th><th>Naive Dense Search</th><th>Hybrid Qdrant + BM25 RRF</th></tr>
-                            </thead>
+                            <thead><tr><th>Metric</th><th>Naive Dense</th><th>Hybrid RRF</th></tr></thead>
                             <tbody>
-                                <tr>
-                                    <th>HitRate@1</th>
-                                    <td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('hit_rate_at_1', 0.8333) }}</td>
-                                    <td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('hit_rate_at_1', 1.0) }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <th>Recall@3</th>
-                                    <td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('recall_at_3', 0.8333) }}</td>
-                                    <td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('recall_at_3', 1.0) }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <th>Mean Reciprocal Rank (MRR)</th>
-                                    <td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('mrr', 0.8333) }}</td>
-                                    <td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('mrr', 1.0) }}</strong></td>
-                                </tr>
+                                <tr><th>HitRate@1</th><td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('hit_rate_at_1', 0.8333) }}</td><td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('hit_rate_at_1', 1.0) }}</strong></td></tr>
+                                <tr><th>Recall@3</th><td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('recall_at_3', 0.8333) }}</td><td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('recall_at_3', 1.0) }}</strong></td></tr>
+                                <tr><th>MRR</th><td class="mono">{{ rag_data.get('naive_dense_rag', {}).get('mrr', 0.8333) }}</td><td class="mono"><strong>{{ rag_data.get('advanced_hybrid_rrf_rag', {}).get('mrr', 1.0) }}</strong></td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
-        </section>
-
-        <!-- ===================================================================== -->
-        <!-- TAB 5: STATUS & GROUNDING LOG (/health)                               -->
-        <!-- ===================================================================== -->
-        <section id="view-health" class="tab-view hidden">
-            <div class="eui-panel">
-                <div class="eui-head">
-                    <span>Service Readiness &amp; Grounding Audit Log (`llm_telemetry_logs.jsonl`)</span>
-                    <a href="/metrics?format=json" target="_blank" class="btn-outline">Raw /metrics JSON</a>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('evaluation', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('evaluation', 1)">Next Step &rarr;</button>
                 </div>
-                <div class="eui-body">
-                    <div class="grid-4">
-                        <div style="border:1px solid #d3dae6; padding:8px;">
-                            <div style="font-size:11px; color:#555;">Service Status</div>
-                            <div class="mono" style="font-size:16px; font-weight:700; color:#006d64;">{{ health_data.get('status', 'healthy') | upper }}</div>
-                        </div>
-                        <div style="border:1px solid #d3dae6; padding:8px;">
-                            <div style="font-size:11px; color:#555;">Logged Calls</div>
-                            <div class="mono" style="font-size:16px; font-weight:700;">{{ mon_data.get('total_requests_logged', 0) }}</div>
-                        </div>
-                        <div style="border:1px solid #d3dae6; padding:8px;">
-                            <div style="font-size:11px; color:#555;">Mean Grounding</div>
-                            <div class="mono" style="font-size:16px; font-weight:700;">{{ mon_data.get('avg_faithfulness_score', 0.92) }}</div>
-                        </div>
-                        <div style="border:1px solid #d3dae6; padding:8px;">
-                            <div style="font-size:11px; color:#555;">Low-Grounding Flags</div>
-                            <div class="mono" style="font-size:16px; font-weight:700;">{{ mon_data.get('hallucination_alert_count', 0) }}</div>
-                        </div>
+            </section>
+
+            <!-- ===================================================================== -->
+            <!-- SECTION 5, 6, 7, 8: HEALTH, INTRO, HELP & DOCS WIZARDS                -->
+            <!-- ===================================================================== -->
+            <section id="sec-health" class="sec-view hidden">
+                <div class="modal-header"><span class="modal-title">Service Status &amp; Grounding Log</span><span class="mono" id="lbl-health">Step 1 of 2</span></div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('health', 1)" id="st-health-1">1. Summary Counters</button>
+                    <button type="button" class="step-btn" onclick="setStep('health', 2)" id="st-health-2">2. Recent Grounding Traces</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-health-1">
+                        <table class="eui-table">
+                            <tr><th>Status</th><td class="mono"><strong>{{ health_data.get('status', 'healthy') | upper }}</strong></td></tr>
+                            <tr><th>Logged Requests</th><td class="mono">{{ mon_data.get('total_requests_logged', 0) }}</td></tr>
+                            <tr><th>Mean Grounding Overlap</th><td class="mono">{{ mon_data.get('avg_faithfulness_score', 0.92) }}</td></tr>
+                        </table>
                     </div>
-
-                    <table class="eui-table">
-                        <thead>
-                            <tr><th>Timestamp (UTC)</th><th>Endpoint</th><th>Tokens</th><th>Latency</th><th>Grounding Overlap</th><th>Status</th></tr>
-                        </thead>
-                        <tbody>
-                            {% for row in telemetry_logs %}
-                            <tr>
-                                <td class="mono">{{ row.timestamp_utc[:19] }}</td>
-                                <td class="mono"><strong>{{ row.endpoint }}</strong></td>
-                                <td class="mono">{{ row.total_tokens }}</td>
-                                <td class="mono">{{ row.latency_ms }} ms</td>
-                                <td class="mono">{{ row.faithfulness_score }}</td>
-                                <td>
-                                    {% if row.hallucination_alert %}
-                                    <span class="badge badge-err">FLAGGED (&lt;0.45)</span>
-                                    {% else %}
-                                    <span class="badge badge-ok">GROUNDED</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===================================================================== -->
-        <!-- TAB 6: DEV NOTES (/intro)                                             -->
-        <!-- ===================================================================== -->
-        <section id="view-intro" class="tab-view hidden">
-            <div class="eui-panel">
-                <div class="eui-head">
-                    <span>Developer Notes: Building the Summarizer &amp; Hybrid Search Pipeline</span>
-                    <span class="mono">v2.0.0</span>
-                </div>
-                <div class="eui-body" style="line-height:1.65;">
-                    <p style="margin-bottom:10px;">
-                        When an outage hits, nobody wants to read 80 lines of Slack back-and-forth just to find out which container broke and what fixed it. At the same time, searching internal runbooks with plain dense embeddings fails surprisingly often on short acronyms like `LoRA`, `RRF`, `DVC`, or `KS` because subword tokenizers split unfamiliar acronyms into noisy fragments.
-                    </p>
-                    <p style="margin-bottom:10px;">
-                        I built this repo in three parts:
-                    </p>
-                    <table class="eui-table">
-                        <tr>
-                            <th style="width:240px;">1. First-Principles Modules (`first_principles_llm.py`)</th>
-                            <td>Implements `BytePairTokenizerFromScratch` over raw UTF-8 byte sequences (0..255), `ScaledDotProductMultiHeadAttention` with upper-triangular `-inf` masking, and `LoRALinearFromScratch` (`W_0 x + (alpha/r) B A x`). Matrix `B` is initialized to zeros so the adapter starts as an exact identity function at step 0.</td>
-                        </tr>
-                        <tr>
-                            <th>2. Flan-T5 LoRA Fine-Tuning (`model_trainer.py`)</th>
-                            <td>Freezes `google/flan-t5-small` base weights and trains low-rank adapters (`r=8, alpha=16`) on incident transcripts, cutting trainable parameters by ~98.8% and checking ROUGE-1/ROUGE-L gates before saving.</td>
-                        </tr>
-                        <tr>
-                            <th>3. Qdrant + BM25 RRF (`rag_engine.py`)</th>
-                            <td>Runs acronym query expansion, queries both Qdrant cosine vectors and BM25 Okapi lexical scores, combines ranks via Reciprocal Rank Fusion (`1/(60 + r_dense) + 1/(60 + r_bm25)`), and checks every sentence in the output for content-word overlap against the retrieved `[DOC-ID]` chunks.</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===================================================================== -->
-        <!-- TAB 7: HELP & OPERATOR GUIDE (/help)                                  -->
-        <!-- ===================================================================== -->
-        <section id="view-help" class="tab-view hidden">
-            <div class="eui-panel">
-                <div class="eui-head">
-                    <span>Help &amp; Operator Guide: How to Use Every Tab</span>
-                    <span class="badge badge-ok">User Manual</span>
-                </div>
-                <div class="eui-body" style="line-height:1.65;">
-                    <h4 style="color:#006bb4; margin-bottom:4px;">1. Summarizing Incident Logs (Tab 1, Left Panel)</h4>
-                    <ul style="margin-left:20px; margin-bottom:12px;">
-                        <li>Click one of the three <strong>Preset</strong> buttons in the blue bar at the top, or paste any multi-speaker chat log into the transcript box.</li>
-                        <li>Pick a format style (<strong>Executive Brief</strong>, <strong>SRE Post-Mortem</strong>, or <strong>SLA Audit Note</strong>) and click <strong>Run LoRA Summarizer</strong>.</li>
-                        <li>Check the <strong>Sentence Grounding Check</strong> at the bottom of the panel: sentences with `&gt;= 65%` content-word overlap with your source transcript get a green `VERIFIED_GROUNDED` badge.</li>
-                    </ul>
-
-                    <h4 style="color:#006bb4; margin-bottom:4px;">2. Comparing Naive Dense vs. BM25 vs. Hybrid RRF (Tab 1, Right Panel)</h4>
-                    <ul style="margin-left:20px; margin-bottom:12px;">
-                        <li>Enter a technical question (try including acronyms like `LoRA`, `RRF`, or `KS`) and click <strong>Search &amp; Compare 3 Modes</strong>.</li>
-                        <li>Look at the 3-column table under <strong>Side-by-Side Retriever Comparison</strong> to see which `[DOC-ID]` chunks Naive Dense, Pure BM25, and Hybrid RRF ranked #1, #2, and #3.</li>
-                    </ul>
-
-                    <h4 style="color:#006bb4; margin-bottom:4px;">3. Indexing New Runbooks &amp; Testing BPE / LoRA Math (Tabs 2 &amp; 3)</h4>
-                    <ul style="margin-left:20px; margin-bottom:12px;">
-                        <li>In <strong>Tab 2</strong>, fill out the right-hand form and click <strong>Index Chunk Now</strong> to add a new `[DOC-xxx]` entry into Qdrant and BM25.</li>
-                        <li>In <strong>Tab 3</strong>, test custom `{context}` / `{query}` prompt templates on the left, or inspect the UTF-8 byte-pair merge table and LoRA parameter reduction calculator on the right.</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===================================================================== -->
-        <!-- TAB 8: BUILT-IN INTERACTIVE REST API TESTER (/docs)                   -->
-        <!-- ===================================================================== -->
-        <section id="view-docs" class="tab-view hidden">
-            <div class="eui-panel">
-                <div class="eui-head">
-                    <span>Interactive REST API Tester (`/docs`)</span>
-                    <div>
-                        <a href="/openapi.json" target="_blank" class="btn-outline">Raw /openapi.json</a>
-                        <a href="/swagger-raw" target="_blank" class="btn-outline">CDN Swagger (/swagger-raw)</a>
+                    <div class="step-pane" id="pn-health-2">
+                        <table class="eui-table">
+                            <thead><tr><th>Endpoint</th><th>Tokens</th><th>Latency</th><th>Grounding</th></tr></thead>
+                            <tbody>
+                                {% for row in telemetry_logs[:6] %}
+                                <tr><td class="mono">{{ row.endpoint }}</td><td class="mono">{{ row.total_tokens }}</td><td class="mono">{{ row.latency_ms }} ms</td><td class="mono">{{ row.faithfulness_score }}</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="eui-body">
-                    <p style="margin-bottom:10px;">
-                        Send live HTTP requests to the FastAPI backend directly from this panel (no external CDN scripts needed).
-                    </p>
-                    <div class="grid-2">
-                        <div>
-                            <div style="border:1px solid #d3dae6; padding:10px; margin-bottom:8px;">
-                                <strong>GET /health</strong> &amp; <strong>GET /metrics</strong>
-                                <div style="margin-top:6px; display:flex; gap:6px;">
-                                    <button type="button" class="btn-blue" onclick="callApi('GET', '/health?format=json')">GET /health</button>
-                                    <button type="button" class="btn-blue" onclick="callApi('GET', '/metrics?format=json')">GET /metrics</button>
-                                </div>
-                            </div>
-                            <div style="border:1px solid #d3dae6; padding:10px; margin-bottom:8px;">
-                                <strong>POST /summarize</strong>
-                                <button type="button" class="btn-blue" style="margin-top:6px; display:block;" onclick="callSumApi()">Send Sample POST /summarize</button>
-                            </div>
-                            <div style="border:1px solid #d3dae6; padding:10px;">
-                                <strong>POST /rag-qa</strong>
-                                <button type="button" class="btn-teal" style="margin-top:6px; display:block;" onclick="callRagApi()">Send Sample POST /rag-qa</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label>HTTP Response Inspector:</label>
-                            <pre id="api-out-box" class="log-box" style="min-height:260px; max-height:420px; overflow-y:auto;">Click a button on the left to inspect the JSON response.</pre>
-                        </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('health', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('health', 1)">Next Step &rarr;</button>
+                </div>
+            </section>
+
+            <section id="sec-intro" class="sec-view hidden">
+                <div class="modal-header"><span class="modal-title">Developer Notes</span><span class="mono" id="lbl-intro">Step 1 of 2</span></div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('intro', 1)" id="st-intro-1">1. First-Principles BPE &amp; LoRA</button>
+                    <button type="button" class="step-btn" onclick="setStep('intro', 2)" id="st-intro-2">2. Hybrid Qdrant + BM25 RRF</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-intro-1">
+                        <p>Implemented `BytePairTokenizerFromScratch`, causal multi-head attention, and `LoRALinearFromScratch` (`W_0 x + (alpha/r) B A x` with zero-initialized `B`) before fine-tuning `google/flan-t5-small` adapters.</p>
+                    </div>
+                    <div class="step-pane" id="pn-intro-2">
+                        <p>Combined Qdrant dense cosine search with BM25 Okapi lexical search via Reciprocal Rank Fusion (`k=60`) and domain acronym expansion so short technical queries never miss exact matches.</p>
                     </div>
                 </div>
-            </div>
-        </section>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('intro', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('intro', 1)">Next Step &rarr;</button>
+                </div>
+            </section>
 
-    </main>
+            <section id="sec-help" class="sec-view hidden">
+                <div class="modal-header"><span class="modal-title">Help &amp; Operator Guide</span><span class="mono" id="lbl-help">Step 1 of 2</span></div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('help', 1)" id="st-help-1">1. Using the Summarizer</button>
+                    <button type="button" class="step-btn" onclick="setStep('help', 2)" id="st-help-2">2. Using 3-Way Search</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-help-1">
+                        <p>In <strong>1. Summarizer &amp; Search</strong>, pick an outage preset in Step 1 and click <strong>Summarize &amp; Move to Step 2</strong> to view the condensed output and word reduction metrics.</p>
+                    </div>
+                    <div class="step-pane" id="pn-help-2">
+                        <p>Advance to Step 3, enter a technical question, and click <strong>Run 3-Way Search</strong> to compare Naive Dense, Pure BM25, and Hybrid RRF rankings side by side in Step 4.</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('help', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('help', 1)">Next Step &rarr;</button>
+                </div>
+            </section>
+
+            <section id="sec-docs" class="sec-view hidden">
+                <div class="modal-header"><span class="modal-title">Interactive REST API Tester (`/docs`)</span><span class="mono" id="lbl-docs">Step 1 of 2</span></div>
+                <div class="step-bar">
+                    <button type="button" class="step-btn active" onclick="setStep('docs', 1)" id="st-docs-1">1. Choose Endpoint</button>
+                    <button type="button" class="step-btn" onclick="setStep('docs', 2)" id="st-docs-2">2. JSON Response</button>
+                </div>
+                <div class="modal-body">
+                    <div class="step-pane active" id="pn-docs-1">
+                        <div style="display:flex; flex-direction:column; gap:8px;">
+                            <button type="button" class="btn btn-blue" onclick="callApi('GET', '/health?format=json')">1. Send GET /health</button>
+                            <button type="button" class="btn btn-blue" onclick="callApi('GET', '/metrics?format=json')">2. Send GET /metrics</button>
+                            <button type="button" class="btn btn-teal" onclick="callRagApi()">3. Send Sample POST /rag-qa</button>
+                        </div>
+                    </div>
+                    <div class="step-pane" id="pn-docs-2">
+                        <pre id="api-out-box" class="log-box" style="min-height:200px;">Click an endpoint in Step 1 to view the response.</pre>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="stepDelta('docs', -1)">&larr; Previous Step</button>
+                    <button type="button" class="btn btn-blue" onclick="stepDelta('docs', 1)">Next Step &rarr;</button>
+                </div>
+            </section>
+
+        </div>
+    </div>
 
     <script>
         let currentPersona = "executive_brief";
-        const initialPage = "{{ active_page or 'studio' }}";
+        const initialSection = "{{ active_page or 'studio' }}";
         const presets = {{ sample_presets | tojson }};
+        const stepCounts = { studio: 4, chunks: 3, playground: 2, evaluation: 2, health: 2, intro: 2, help: 2, docs: 2 };
+        const stepState = { studio: 1, chunks: 1, playground: 1, evaluation: 1, health: 1, intro: 1, help: 1, docs: 1 };
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-view').forEach(el => el.classList.add('hidden'));
+        function switchSection(sec) {
+            if (!stepCounts[sec]) sec = 'studio';
+            document.querySelectorAll('.sec-view').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.kbn-tab').forEach(el => el.classList.remove('active'));
-            const view = document.getElementById('view-' + tab) || document.getElementById('view-studio');
-            const btn = document.getElementById('tab-' + tab) || document.getElementById('tab-studio');
-            view.classList.remove('hidden');
-            btn.classList.add('active');
-            if (tab === 'chunks') loadChunks();
-            if (tab === 'playground') runFirstPrinciplesLab();
+            document.getElementById('sec-' + sec).classList.remove('hidden');
+            document.getElementById('sec-btn-' + sec).classList.add('active');
+            if (sec === 'chunks') loadChunks();
+            if (sec === 'playground') runFirstPrinciplesLab();
+        }
+
+        function setStep(sec, n) {
+            const max = stepCounts[sec];
+            if (n < 1 || n > max) return;
+            stepState[sec] = n;
+            for (let i = 1; i <= max; i++) {
+                document.getElementById(`pn-${sec}-${i}`).classList.toggle('active', i === n);
+                document.getElementById(`st-${sec}-${i}`).classList.toggle('active', i === n);
+            }
+            document.getElementById('lbl-' + sec).textContent = `Step ${n} of ${max}`;
+        }
+
+        function stepDelta(sec, d) {
+            setStep(sec, stepState[sec] + d);
         }
 
         function setPersona(p) {
             currentPersona = p;
             document.querySelectorAll('.persona-btn').forEach(b => {
-                if (b.dataset.persona === p) {
-                    b.classList.add('active-persona');
-                } else {
-                    b.classList.remove('active-persona');
-                }
+                b.classList.toggle('active-persona', b.dataset.persona === p);
             });
         }
 
@@ -736,97 +510,45 @@ Answer with [DOC-ID] tags:</textarea>
             if (!p) return;
             document.getElementById('sum-dialogue').value = p.dialogue;
             document.getElementById('rag-query').value = p.query;
-            runSummarizer();
-            runRagDuel();
-        }
-
-        function renderClaimBadges(claims, containerId) {
-            const box = document.getElementById(containerId);
-            if (!claims || !claims.length) { box.innerHTML = ''; return; }
-            box.innerHTML = claims.map(c => {
-                const cls = c.badge_color === 'emerald' ? 'badge-ok' : (c.badge_color === 'amber' ? 'badge-warn' : 'badge-err');
-                return `<div style="border:1px solid #d3dae6; padding:6px 8px; margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; gap:8px; background:#fff;">
-                    <span style="font-size:12px;">${c.sentence}</span>
-                    <span class="badge ${cls} mono">${c.verdict} (${Math.round(c.grounding_score*100)}%)</span>
-                </div>`;
-            }).join('');
         }
 
         async function runSummarizer() {
-            const btn = document.getElementById('btn-summarize');
-            btn.textContent = 'Running...';
-            try {
-                const res = await fetch('/summarize', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        dialogue: document.getElementById('sum-dialogue').value,
-                        max_new_tokens: parseInt(document.getElementById('sum-tokens').value || '80'),
-                        persona: currentPersona
-                    })
-                });
-                const data = await res.json();
-                document.getElementById('sum-persona-badge').textContent = data.persona_label || 'Summary';
-                document.getElementById('sum-styled-text').textContent = data.styled_summary || data.summary;
-                document.getElementById('sum-faithfulness').textContent = `Grounding: ${(data.faithfulness_score * 100).toFixed(1)}%`;
-
-                const cm = data.compression_metrics || {};
-                document.getElementById('comp-ratio').textContent = `${cm.compression_reduction_pct ?? 0}%`;
-                document.getElementById('comp-words').textContent = `${cm.source_word_count ?? 0}->${cm.summary_word_count ?? 0}`;
-                document.getElementById('comp-time').textContent = `${cm.reading_time_saved_sec ?? 0}s`;
-                document.getElementById('comp-grade').textContent = `${cm.estimated_grade_level ?? 10}`;
-
-                const ext = data.structured_extraction || {};
-                document.getElementById('sum-entities').innerHTML = (ext.technical_entities || []).map(e =>
-                    `<span class="badge badge-info mono">${e}</span>`
-                ).join('');
-                document.getElementById('sum-actions').innerHTML = (ext.remediation_action_items || []).map(a =>
-                    `<div>- <strong>Action:</strong> ${a}</div>`
-                ).join('');
-
-                renderClaimBadges(data.claim_attributions || [], 'sum-claims');
-            } finally {
-                btn.textContent = 'Run LoRA Summarizer';
-            }
+            const res = await fetch('/summarize', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    dialogue: document.getElementById('sum-dialogue').value,
+                    max_new_tokens: 80,
+                    persona: currentPersona
+                })
+            });
+            const data = await res.json();
+            document.getElementById('sum-persona-badge').textContent = data.persona_label || 'Summary';
+            document.getElementById('sum-styled-text').textContent = data.styled_summary || data.summary;
+            document.getElementById('sum-faithfulness').textContent = `Grounding: ${(data.faithfulness_score * 100).toFixed(1)}%`;
+            const cm = data.compression_metrics || {};
+            document.getElementById('comp-ratio').textContent = `${cm.compression_reduction_pct ?? 0}%`;
+            document.getElementById('comp-words').textContent = `${cm.source_word_count ?? 0}->${cm.summary_word_count ?? 0}`;
+            document.getElementById('comp-time').textContent = `${cm.reading_time_saved_sec ?? 0}s`;
+            document.getElementById('comp-grade').textContent = `${cm.estimated_grade_level ?? 10}`;
+            setStep('studio', 2);
         }
 
         async function runRagDuel() {
-            const btn = document.getElementById('btn-rag');
-            btn.textContent = 'Searching...';
-            try {
-                const cat = document.getElementById('rag-category').value || null;
-                const res = await fetch('/api/rag-duel', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        query: document.getElementById('rag-query').value,
-                        top_k: 3,
-                        category_filter: cat
-                    })
-                });
-                const data = await res.json();
-                document.getElementById('rag-expanded').textContent = data.expanded_query || data.query;
-                document.getElementById('rag-answer').textContent = data.answer;
-                document.getElementById('rag-faithfulness').textContent = `Grounding: ${(data.faithfulness_score * 100).toFixed(1)}%`;
-                document.getElementById('rag-citations').innerHTML = (data.citations || []).map(c =>
-                    `<span class="badge badge-info mono">[${c.doc_id}] ${c.title} (${c.rerank_score})</span>`
-                ).join('');
-
-                const mc = data.mode_comparison || {};
-                document.getElementById('duel-naive').innerHTML = (mc.naive_dense || []).map(r =>
-                    `<div style="margin-bottom:3px;">#${r.rank} [${r.doc_id}] (${r.score})</div>`
-                ).join('');
-                document.getElementById('duel-bm25').innerHTML = (mc.bm25_lexical || []).map(r =>
-                    `<div style="margin-bottom:3px;">#${r.rank} [${r.doc_id}] (${r.score})</div>`
-                ).join('');
-                document.getElementById('duel-hybrid').innerHTML = (mc.hybrid_rrf || []).map(r =>
-                    `<div style="margin-bottom:3px;"><strong>#${r.rank} [${r.doc_id}]</strong> (${r.rerank_score})</div>`
-                ).join('');
-
-                renderClaimBadges(data.claim_attributions || [], 'rag-claims');
-            } finally {
-                btn.textContent = 'Search & Compare 3 Modes';
-            }
+            const cat = document.getElementById('rag-category').value || null;
+            const res = await fetch('/api/rag-duel', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ query: document.getElementById('rag-query').value, top_k: 3, category_filter: cat })
+            });
+            const data = await res.json();
+            document.getElementById('rag-answer').textContent = data.answer;
+            document.getElementById('rag-faithfulness').textContent = `Grounding: ${(data.faithfulness_score * 100).toFixed(1)}%`;
+            const mc = data.mode_comparison || {};
+            document.getElementById('duel-naive').innerHTML = (mc.naive_dense || []).map(r => `<div>#${r.rank} [${r.doc_id}] (${r.score})</div>`).join('');
+            document.getElementById('duel-bm25').innerHTML = (mc.bm25_lexical || []).map(r => `<div>#${r.rank} [${r.doc_id}] (${r.score})</div>`).join('');
+            document.getElementById('duel-hybrid').innerHTML = (mc.hybrid_rrf || []).map(r => `<div><strong>#${r.rank} [${r.doc_id}]</strong> (${r.rerank_score})</div>`).join('');
+            setStep('studio', 4);
         }
 
         async function loadChunks() {
@@ -836,31 +558,14 @@ Answer with [DOC-ID] tags:</textarea>
             const canvas = document.getElementById('vector-canvas');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            ctx.strokeStyle = '#e4e9f0';
-            for (let x = 40; x < canvas.width; x += 70) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke(); }
-            for (let y = 30; y < canvas.height; y += 50) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke(); }
-
             chunks.forEach(c => {
                 const px = 60 + ((c.x + 0.6) / 1.4) * (canvas.width - 140);
                 const py = 35 + ((c.y + 0.6) / 1.4) * (canvas.height - 70);
-                ctx.beginPath();
-                ctx.arc(px, py, 5, 0, Math.PI * 2);
-                ctx.fillStyle = '#006bb4';
-                ctx.fill();
-                ctx.fillStyle = '#1a1c21';
-                ctx.font = '11px monospace';
-                ctx.fillText(`[${c.doc_id}]`, px + 8, py + 4);
+                ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fillStyle = '#006bb4'; ctx.fill();
+                ctx.fillStyle = '#1a1c21'; ctx.font = '11px monospace'; ctx.fillText(`[${c.doc_id}]`, px + 8, py + 4);
             });
-
             document.getElementById('chunk-list').innerHTML = chunks.map(c =>
-                `<div style="border:1px solid #d3dae6; padding:8px; margin-bottom:6px; background:#fafbfd;">
-                    <div style="display:flex; justify-content:space-between;">
-                        <strong class="mono">[${c.doc_id}] ${c.title}</strong>
-                        <span class="badge badge-info">${c.category}</span>
-                    </div>
-                    <div style="font-size:12px; margin-top:4px;">${c.chunk_text}</div>
-                </div>`
+                `<div style="border:1px solid #d3dae6; padding:8px; margin-bottom:6px;"><strong>[${c.doc_id}] ${c.title}</strong><div style="font-size:12px;">${c.chunk_text}</div></div>`
             ).join('');
         }
 
@@ -876,8 +581,9 @@ Answer with [DOC-ID] tags:</textarea>
                 })
             });
             const data = await res.json();
-            document.getElementById('ing-status').textContent = `Indexed [${data.ingested_chunk.doc_id}] (Total Chunks: ${data.total_indexed_chunks})`;
-            loadChunks();
+            document.getElementById('ing-status').textContent = `Indexed [${data.ingested_chunk.doc_id}]`;
+            await loadChunks();
+            setStep('chunks', 2);
         }
 
         async function runPromptPlayground() {
@@ -892,13 +598,7 @@ Answer with [DOC-ID] tags:</textarea>
                 })
             });
             const data = await res.json();
-            document.getElementById('pg-output').innerHTML = `
-                <div style="border:1px solid #d3dae6; padding:8px; background:#fafbfd; margin-bottom:6px;">
-                    <strong>Output (Grounding: ${(data.faithfulness_score*100).toFixed(1)}% | ${data.latency_ms} ms):</strong>
-                    <div style="margin-top:4px;">${data.synthesized_response}</div>
-                </div>
-                <pre class="log-box">${data.rendered_prompt}</pre>
-            `;
+            document.getElementById('pg-output').innerHTML = `<div style="border:1px solid #d3dae6; padding:8px; margin-top:6px;">${data.synthesized_response}</div>`;
         }
 
         async function runFirstPrinciplesLab() {
@@ -908,48 +608,29 @@ Answer with [DOC-ID] tags:</textarea>
                 body: JSON.stringify({
                     sample_text: document.getElementById('fp-text').value,
                     vocab_size: parseInt(document.getElementById('fp-vocab').value || '268'),
-                    d_model: 32,
-                    num_heads: 4,
+                    d_model: 32, num_heads: 4,
                     lora_r: parseInt(document.getElementById('fp-r').value || '8'),
                     lora_alpha: parseFloat(document.getElementById('fp-alpha').value || '16')
                 })
             });
             const data = await res.json();
-            const bpe = data.bpe_lab;
-            const lora = data.lora_lab;
-            const attn = data.attention_lab;
             document.getElementById('fp-output').innerHTML = `
-                <table class="eui-table" style="margin-bottom:8px;">
-                    <tr><th>BPE Byte Compression</th><td class="mono">${bpe.raw_utf8_byte_length} bytes -> ${bpe.bpe_token_length} tokens (${bpe.compression_ratio_pct}% cut, lossless=${bpe.lossless_roundtrip_verified})</td></tr>
-                    <tr><th>LoRA Parameter Savings</th><td class="mono">${lora.trainable_lora_params} trainable vs ${lora.frozen_pretrained_params} frozen (${lora.parameter_reduction_pct}% saved)</td></tr>
-                    <tr><th>LoRA Step-0 Delta W</th><td class="mono">${lora.step_0_max_deviation} (Zero-init verified=${lora.zero_init_identity_verified})</td></tr>
-                    <tr><th>Causal Mask Upper-Tri Max</th><td class="mono">${attn.causal_upper_triangle_max_leakage} (Verified=${attn.causal_mask_verified})</td></tr>
-                </table>
-                <pre class="log-box">Learned BPE Merges: ${bpe.top_merges.slice(0, 6).map(m => `${m.pair}->#${m.new_token_id}(${m.subword_str})`).join(', ')}</pre>
-            `;
+                <table class="eui-table">
+                    <tr><th>BPE Compression</th><td class="mono">${data.bpe_lab.raw_utf8_byte_length}B -> ${data.bpe_lab.bpe_token_length} IDs (${data.bpe_lab.compression_ratio_pct}%)</td></tr>
+                    <tr><th>LoRA Savings</th><td class="mono">${data.lora_lab.parameter_reduction_pct}% (Zero-Init Verified=${data.lora_lab.zero_init_identity_verified})</td></tr>
+                </table>`;
         }
 
         async function callApi(method, url) {
+            setStep('docs', 2);
             const box = document.getElementById('api-out-box');
-            box.textContent = method + ' ' + url + ' ...';
             const r = await fetch(url, { method: method, headers: {'Accept': 'application/json'} });
             const j = await r.json();
             box.textContent = 'HTTP ' + r.status + '\n\n' + JSON.stringify(j, null, 2);
         }
-        async function callSumApi() {
-            const box = document.getElementById('api-out-box');
-            box.textContent = 'POST /summarize ...';
-            const r = await fetch('/summarize', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ dialogue: document.getElementById('sum-dialogue').value, max_new_tokens: 64, persona: 'sre_deep_dive' })
-            });
-            const j = await r.json();
-            box.textContent = 'HTTP ' + r.status + '\n\n' + JSON.stringify(j, null, 2);
-        }
         async function callRagApi() {
+            setStep('docs', 2);
             const box = document.getElementById('api-out-box');
-            box.textContent = 'POST /rag-qa ...';
             const r = await fetch('/rag-qa', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -960,9 +641,7 @@ Answer with [DOC-ID] tags:</textarea>
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            switchTab(initialPage);
-            runSummarizer();
-            runRagDuel();
+            switchSection(initialSection);
         });
     </script>
 </body>
